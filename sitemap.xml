@@ -1,6 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
+        <loc>http://www.soulmachine.me/blog/2014/01/28/restore-octopress-at-a-new-computer/</loc>
+        <lastmod>2014-03-20T14:18:16+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.soulmachine.me/about/</loc>
+        <lastmod>2014-03-20T14:52:13+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://www.soulmachine.me/blog/archives/</loc>
         <lastmod>2014-03-20T14:18:16+08:00</lastmod>
     </url>

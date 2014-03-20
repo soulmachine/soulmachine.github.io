@@ -9,7 +9,7 @@
   <meta name="author" content="soulmachine">
 
   
-  <meta name="description" content="Blog Archives Recent Posts GitHub Repos Status updating&#8230; @soulmachine on GitHub $(document).ready(function(){ if (!window.jXHR){ var jxhr = &hellip;">
+  <meta name="description" content="OS: Ubuntu 12.04 64-bit 1. Install ruby 1.1 Install ruby via RVM $ \curl -sSL https://get.rvm.io | bash -s stable --ruby 1.2 Integrating RVM with &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,8 @@
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="http://cn.soulmachine.me" target="_blank">中文博客</a></li>
 </ul>
 
 </nav>
@@ -77,6 +79,84 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/01/28/restore-octopress-at-a-new-computer/">Restore Octopress at a New Computer</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-28T00:04:00+08:00" pubdate data-updated="true">Jan 28<span>th</span>, 2014</time>
+        
+           | <a href="/blog/2014/01/28/restore-octopress-at-a-new-computer/#disqus_thread"
+             data-disqus-identifier="http://www.soulmachine.me/blog/2014/01/28/restore-octopress-at-a-new-computer/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>OS: Ubuntu 12.04 64-bit</p>
+
+<h2>1. Install ruby</h2>
+
+<h3>1.1 Install ruby via RVM</h3>
+
+<pre><code>$ \curl -sSL https://get.rvm.io | bash -s stable --ruby
+</code></pre>
+
+<h3>1.2 <a href="https://rvm.io/integration/gnome-terminal">Integrating RVM with gnome-terminal</a></h3>
+
+<p><code>/etc/profile</code>, <code>~/.bash_profile</code> are for login shell, and <code>~/.bashrc</code> is for interactive shell, and RVM&rsquo;s path is added to <code>~/.bash_profile</code>, so you need to set the shell as a login shell.</p>
+
+<h3>1.3 Give it a try</h3>
+
+<p>Exit current shell, and open a new shell,</p>
+
+<pre><code>ruby -v
+</code></pre>
+
+<p>You have successfully installed ruby.</p>
+
+<h2>2. Install Python</h2>
+
+<pre><code>$ sudo apt-get install -y python
+</code></pre>
+
+<p>Because <a href="http://pygments.org/">Pygments</a> syntax highlighting needs Python.</p>
+
+<h2>3. Clone your blog to the new machine</h2>
+
+<p>First you need to clone the <code>source</code> branch to the local octopress folder.</p>
+
+<pre><code>$ git clone -b source git@github.com:username/username.github.com.git octopress
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/01/28/restore-octopress-at-a-new-computer/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   <div class="pagination">
     
@@ -87,51 +167,66 @@
 <aside class="sidebar">
   
     <section>
+  <h1>About Me</h1>
+  <p>Spark, Machine Learning, Scala, <a href="/about">more&#8230;</a></p>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/tools/'>Tools (1)</a></li></ul>
+</section>
+<section>
+  <h2>Blogroll</h2>
+  <ul>
+    <li>
+      <a href="http://yewen.us/" title="ACMer">Ye Wen</a>
+    </li>
+	<li>
+      <a href="http://blog.liancheng.info/" title="Engineer at Databricks">Lian Cheng</a>
+    </li>
+    <li>
+      <a href="http://www.rational.so/" title="CS PhD Candidate at Tsinghua University">Dong Yan</a>
+    </li>
+	<li>
+      <a href="http://www.parallellabs.com/" title="Data Scientist / Technical Leader at IBM">Parallel Labs</a>
+    </li>
+	<li>
+      <a href="http://blog.javachen.com/" title="">JavaChen</a>
+    </li>
+	<li>
+      <a href="http://shenfeng.me/" title="http-kit, clojure">Shen Feng</a>
+    </li>
+	<li>
+      <a href="http://www.lihaipeng.info/" title="Senior engineer at Baidu">Lee Haipeng</a>
+    </li>
+	<li>
+      <a href="http://www.chioka.in/" title="Engineer at Google">Eric</a>
+    </li>
+    <li>
+      <a href="http://blog.csdn.net/lgnlgn" title="Engineer at Maopu">Liang Sir</a>
+    </li>
+    <li>
+      <a href="http://www.doesbetter.com/" title="Machine learning Master">Wang Xiaoshu</a>
+    </li>
+    <li>
+      <a href="http://www.foreverlee.net/" title="CS PhD Candidate at IACAS">ForeverLee</a>
+    </li>
+  </ul>
+</section>
+<section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
     
+      <li class="post">
+        <a href="/blog/2014/01/28/restore-octopress-at-a-new-computer/">Restore Octopress at a New Computer</a>
+      </li>
+    
   </ul>
 </section>
-
 <section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
-  </ul>
-  
-  <a href="https://github.com/soulmachine">@soulmachine</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'soulmachine',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
+  <h2>Recent Comments</h2>
+  <div id="dsq-recentcomments" class="dsq-widget"><script type="text/javascript" src="http://disqus.com/forums/soulmachine/recent_comments_widget.js?hide_avatars=0&num_items=5&excerpt_length=20"></script></div>
 </section>
 
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/soulmachine?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
 
 
 
@@ -140,7 +235,22 @@
 
     </div>
   </div>
-  <footer role="contentinfo"><p>
+  <footer role="contentinfo"><!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<p>
   Copyright &copy; 2014 - soulmachine -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
@@ -173,6 +283,14 @@
 }(document, 'script', 'facebook-jssdk'));</script>
 
 
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
 
 
 
