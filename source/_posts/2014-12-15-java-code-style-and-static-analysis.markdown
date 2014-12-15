@@ -1,10 +1,3 @@
----
-layout: post
-title: "Java Code Style and Static Analysis"
-date: 2014-12-15 11:42:09 -0800
-comments: true
-categories: 
----
 
 ##1. Checkstyle
 
@@ -73,8 +66,9 @@ Add the following lines to pom.xml to enable Checkstyle:
             </plugin>
         </plugins>
     </reporting>
-
+    
 <!-- more -->
+
 
 ##1.3 Maven Eclipse Plugin
 
@@ -180,3 +174,6 @@ To configure your build to fail if any errors are found in the FindBugs report, 
 
 Reference: <http://mojo.codehaus.org/findbugs-maven-plugin/examples/violationChecking.html>
 
+##4. What's next?
+
+Nowadays there are many tools that are more powerful and automatic, for example, [SonarQube](http://www.sonarqube.org/), [Coverity](http://www.coverity.com/). SonarQube is an open source quality management platform, dedicated to continuously analyze and measure source code quality, and has been used by [many companies](http://zeroturnaround.com/rebellabs/developers-guide-static-code-analysis-findbugs-checkstyle-pmd-coverity-sonarqube/), I will try it in the next step.
