@@ -2,22 +2,26 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://www.soulmachine.me/blog/2014/01/28/restore-octopress-at-a-new-computer/</loc>
-        <lastmod>2014-03-20T14:18:16+08:00</lastmod>
+        <lastmod>2014-11-25T10:32:25-08:00</lastmod>
     </url>
     <url>
-        <loc>http://www.soulmachine.me/about/</loc>
-        <lastmod>2014-03-20T14:52:13+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://www.soulmachine.me/blog/archives/</loc>
-        <lastmod>2014-03-20T14:18:16+08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://www.soulmachine.me/</loc>
-        <lastmod>2014-03-20T14:18:16+08:00</lastmod>
+        <loc>http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis/</loc>
+        <lastmod>2014-12-15T11:49:27-08:00</lastmod>
     </url>
     <url>
         <loc>http://www.soulmachine.me/robots.txt</loc>
-        <lastmod>2014-03-20T14:18:15+08:00</lastmod>
+        <lastmod>2014-11-25T10:32:25-08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.soulmachine.me/about/</loc>
+        <lastmod>2014-11-25T10:32:25-08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.soulmachine.me/</loc>
+        <lastmod>2014-12-15T11:49:27-08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.soulmachine.me/blog/archives/</loc>
+        <lastmod>2014-12-15T11:49:27-08:00</lastmod>
     </url>
 </urlset>

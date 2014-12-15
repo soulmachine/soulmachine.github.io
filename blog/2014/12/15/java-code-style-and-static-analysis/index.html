@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>soulmachine</title>
+  <title>Java Code Style and Static Analysis - soulmachine</title>
   <meta name="author" content="soulmachine">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.soulmachine.me">
+  <link rel="canonical" href="http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="soulmachine" type="application/atom+xml">
@@ -77,15 +77,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/12/15/java-code-style-and-static-analysis/">Java Code Style and Static Analysis</a></h1>
+      <h1 class="entry-title">Java Code Style and Static Analysis</h1>
     
     
       <p class="meta">
@@ -103,15 +100,15 @@
 
 <time datetime="2014-12-15T11:42:09-08:00" pubdate data-updated="true">Dec 15<span>th</span>, 2014</time>
         
-           | <a href="/blog/2014/12/15/java-code-style-and-static-analysis/#disqus_thread"
-             data-disqus-identifier="http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis/">Comments</a>
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://www.soulmachine.me">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>1. Checkstyle</h2>
+<div class="entry-content"><h2>1. Checkstyle</h2>
 
 <p><a href="http://checkstyle.sourceforge.net/">CheckStyle</a> is a development tool to help programmers write Java code that adheres to a coding standard. It automates the process of checking Java code to spare humans of this boring (but important) task. This makes it ideal for projects that want to enforce a coding standard.</p>
 
@@ -179,27 +176,124 @@
 &lt;/reporting&gt;
 </code></pre>
 
+<!-- more -->
+
+
+<h2>1.3 Maven Eclipse Plugin</h2>
+
+<p>To format source code automatically according to Google Java style, import the file <a href="https://google-styleguide.googlecode.com/svn/trunk/eclipse-java-google-style.xml">eclipse-java-google-style.xml</a> into Eclipse by clicking menu &ldquo;Window->Preferences->Java->Code Style->Formatter->Import&rdquo;.</p>
+
+<p>You can add the code style automatically via Maven, add the following lines to pom.xml:</p>
+
+<pre><code>&lt;plugin&gt;
+    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+    &lt;artifactId&gt;maven-eclipse-plugin&lt;/artifactId&gt;
+    &lt;version&gt;2.9&lt;/version&gt;
+    &lt;configuration&gt;
+        &lt;downloadSources&gt;true&lt;/downloadSources&gt;
+        &lt;downloadJavadocs&gt;true&lt;/downloadJavadocs&gt;
+        &lt;workspace&gt;${basedir}&lt;/workspace&gt;
+        &lt;workspaceCodeStylesURL&gt;https://google-styleguide.googlecode.com/svn/trunk/eclipse-java-google-style.xml&lt;/workspaceCodeStylesURL&gt;
+    &lt;/configuration&gt;
+&lt;/plugin&gt;
+</code></pre>
+
+<h2>2 PMD</h2>
+
+<p>Checking code style is not enough, there are many static anaylysis tools which can analyze your code and find potential bugs, for example PMD, findbugs, etc. The difference between them is <a href="http://www.sw-engineering-candies.com/blog-1/comparison-of-findbugs-pmd-and-checkstyle">http://www.sw-engineering-candies.com/blog-1/comparison-of-findbugs-pmd-and-checkstyle</a>.</p>
+
+<p><a href="http://pmd.sourceforge.net/">PMD</a> is a source code analyzer. It finds common programming flaws like unused variables, empty catch blocks, unnecessary object creation, and so forth.</p>
+
+<h3>2.1 PMD Eclipse Plugin</h3>
+
+<p>PMD Eclipse plugin update site:
+<a href="http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/">http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/</a>.</p>
+
+<h3>2.2 Maven PMD Plugin</h3>
+
+<p>To enable automatically static analysis during compilation, add the following lines to pom.xml:</p>
+
+<pre><code>&lt;build&gt;
+    &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-pmd-plugin&lt;/artifactId&gt;
+        &lt;version&gt;3.3&lt;/version&gt;
+        &lt;executions&gt;
+            &lt;execution&gt;
+                &lt;phase&gt;validate&lt;/phase&gt;
+                &lt;goals&gt;
+                    &lt;goal&gt;check&lt;/goal&gt;
+                    &lt;goal&gt;cpd-check&lt;/goal&gt;
+                &lt;/goals&gt;
+            &lt;/execution&gt;
+        &lt;/executions&gt;
+    &lt;/plugin&gt;
+&lt;/build&gt;
+&lt;reporting&gt;
+    &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;artifactId&gt;maven-pmd-plugin&lt;/artifactId&gt;
+            &lt;version&gt;3.3&lt;/version&gt;
+            &lt;reportSets&gt;
+                &lt;reportSet&gt;
+                    &lt;reports&gt;
+                        &lt;report&gt;pmd&lt;/report&gt;
+                        &lt;report&gt;cpd&lt;/report&gt;
+                    &lt;/reports&gt;
+                &lt;/reportSet&gt;
+            &lt;/reportSets&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/reporting&gt;
+</code></pre>
+
+<h2>3. FindBugs</h2>
+
+<h3>3.1 FindBugs Eclipse Plugin</h3>
+
+<p>Eclipse Update Site: <a href="http://findbugs.cs.umd.edu/eclipse">http://findbugs.cs.umd.edu/eclipse</a></p>
+
+<h3>3.2 Maven FindBugs Plugin</h3>
+
+<p>Official site: <a href="http://mojo.codehaus.org/findbugs-maven-plugin/">http://mojo.codehaus.org/findbugs-maven-plugin/</a></p>
+
+<p>To configure your build to fail if any errors are found in the FindBugs report, add the following lines to pom.xml.</p>
+
+<pre><code>&lt;build&gt;
+    &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+            &lt;artifactId&gt;findbugs-maven-plugin&lt;/artifactId&gt;
+            &lt;version&gt;3.0.1-SNAPSHOT&lt;/version&gt;
+            &lt;configuration&gt;
+                &lt;effort&gt;Max&lt;/effort&gt;
+                &lt;threshold&gt;Low&lt;/threshold&gt;
+                &lt;xmlOutput&gt;true&lt;/xmlOutput&gt;
+            &lt;/configuration&gt;
+            &lt;executions&gt;
+                &lt;execution&gt;
+                    &lt;goals&gt;
+                        &lt;goal&gt;check&lt;/goal&gt;
+                    &lt;/goals&gt;
+                &lt;/execution&gt;
+            &lt;/executions&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/build&gt;
+</code></pre>
+
+<p>Reference: <a href="http://mojo.codehaus.org/findbugs-maven-plugin/examples/violationChecking.html">http://mojo.codehaus.org/findbugs-maven-plugin/examples/violationChecking.html</a></p>
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/15/java-code-style-and-static-analysis/">Read on &rarr;</a>
-    </footer>
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/01/28/restore-octopress-at-a-new-computer/">Restore Octopress at a New Computer</a></h1>
-    
-    
-      <p class="meta">
-        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
+
+      
 
 
 
@@ -211,74 +305,70 @@
   
 
 
-<time datetime="2014-01-28T00:04:00-08:00" pubdate data-updated="true">Jan 28<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/01/28/restore-octopress-at-a-new-computer/#disqus_thread"
-             data-disqus-identifier="http://www.soulmachine.me/blog/2014/01/28/restore-octopress-at-a-new-computer/">Comments</a>
-        
-      </p>
+<time datetime="2014-12-15T11:42:09-08:00" pubdate data-updated="true">Dec 15<span>th</span>, 2014</time>
+      
+
+
+    </p>
     
-  </header>
+      <!-- AddThis Smart Layers BEGIN -->
+<!-- Go to http://www.addthis.com/get/smart-layers to customize -->
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517919846a2b41be"></script>
+<script type="text/javascript">
+  addthis.layers({
+    'theme' : 'transparent',
+    'share' : {
+      'position' : 'left',
+      'numPreferredServices' : 5
+    }, 
+    'follow' : {
+      'services' : [
+        {'service': 'facebook', 'id': 'soulmachine'},
+        {'service': 'twitter', 'id': 'soulmachine'},
+        {'service': 'linkedin', 'id': 'soulmachine'},
+        {'service': 'google_follow', 'id': '103519507226474510310'}
+      ]
+    },  
+    'whatsnext' : {},  
+    'recommended' : {} 
+  });
+</script>
+<!-- AddThis Smart Layers END -->
+<div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis/" data-via="soulmachine" data-counturl="http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/01/28/restore-octopress-at-a-new-computer/" title="Previous Post: Restore Octopress at a new computer">&laquo; Restore Octopress at a new computer</a>
+      
+      
+    </p>
+  </footer>
+</article>
 
-  <div class="entry-content"><p>OS: Ubuntu 12.04 64-bit</p>
-
-<h2>1. Install ruby</h2>
-
-<h3>1.1 Install ruby via RVM</h3>
-
-<pre><code>$ \curl -sSL https://get.rvm.io | bash -s stable --ruby
-</code></pre>
-
-<h3>1.2 <a href="https://rvm.io/integration/gnome-terminal">Integrating RVM with gnome-terminal</a></h3>
-
-<p><code>/etc/profile</code>, <code>~/.bash_profile</code> are for login shell, and <code>~/.bashrc</code> is for interactive shell, and RVM&rsquo;s path is added to <code>~/.bash_profile</code>, so you need to set the shell as a login shell.</p>
-
-<h3>1.3 Give it a try</h3>
-
-<p>Exit current shell, and open a new shell,</p>
-
-<pre><code>ruby -v
-</code></pre>
-
-<p>You have successfully installed ruby.</p>
-
-<h2>2. Install Python</h2>
-
-<pre><code>$ sudo apt-get install -y python
-</code></pre>
-
-<p>Because <a href="http://pygments.org/">Pygments</a> syntax highlighting needs Python.</p>
-
-<h2>3. Clone your blog to the new machine</h2>
-
-<p>First you need to clone the <code>source</code> branch to the local octopress folder.</p>
-
-<pre><code>$ git clone -b source git@github.com:username/username.github.com.git octopress
-</code></pre>
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
 
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/01/28/restore-octopress-at-a-new-computer/">Read on &rarr;</a>
-    </footer>
-  
 
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
 <aside class="sidebar">
   
     <section>
   <h1>About Me</h1>
-  <p>Spark, Machine Learning, Scala, <a href="/about">more&#8230;</a></p>
+  <p>Spark, Machine Learning, Scala, <a href="/about">more...</a></p>
 </section>
 <section>
   <h1>Categories</h1>
@@ -347,6 +437,7 @@
   
 </aside>
 
+
     </div>
   </div>
   <footer role="contentinfo"><!-- mathjax config similar to math.stackexchange -->
@@ -376,7 +467,10 @@ MathJax.Hub.Config({
       var disqus_shortname = 'soulmachine';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis/';
+        var disqus_url = 'http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

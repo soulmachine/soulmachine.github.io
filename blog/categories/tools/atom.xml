@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Tools | soulmachine]]></title>
   <link href="http://www.soulmachine.me/blog/categories/tools/atom.xml" rel="self"/>
   <link href="http://www.soulmachine.me/"/>
-  <updated>2014-03-20T16:29:19+08:00</updated>
+  <updated>2014-12-15T11:49:51-08:00</updated>
   <id>http://www.soulmachine.me/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Restore Octopress at a New Computer]]></title>
     <link href="http://www.soulmachine.me/blog/2014/01/28/restore-octopress-at-a-new-computer/"/>
-    <updated>2014-01-28T00:04:00+08:00</updated>
+    <updated>2014-01-28T00:04:00-08:00</updated>
     <id>http://www.soulmachine.me/blog/2014/01/28/restore-octopress-at-a-new-computer</id>
     <content type="html"><![CDATA[<p>OS: Ubuntu 12.04 64-bit</p>
 
