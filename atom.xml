@@ -4,7 +4,7 @@
   <title><![CDATA[soulmachine]]></title>
   <link href="http://www.soulmachine.me/atom.xml" rel="self"/>
   <link href="http://www.soulmachine.me/"/>
-  <updated>2014-12-15T11:49:51-08:00</updated>
+  <updated>2014-12-15T12:16:10-08:00</updated>
   <id>http://www.soulmachine.me/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Java Code Style and Static Analysis]]></title>
     <link href="http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis/"/>
-    <updated>2014-12-15T11:42:09-08:00</updated>
+    <updated>2014-12-15T00:00:00-08:00</updated>
     <id>http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis</id>
     <content type="html"><![CDATA[<h2>1. Checkstyle</h2>
 
@@ -193,6 +193,10 @@
 </code></pre>
 
 <p>Reference: <a href="http://mojo.codehaus.org/findbugs-maven-plugin/examples/violationChecking.html">http://mojo.codehaus.org/findbugs-maven-plugin/examples/violationChecking.html</a></p>
+
+<h2>4. What&rsquo;s next?</h2>
+
+<p>Nowadays there are many tools that are more powerful and automatic, for example, <a href="http://www.sonarqube.org/">SonarQube</a>, <a href="http://www.coverity.com/">Coverity</a>. SonarQube is an open source quality management platform, dedicated to continuously analyze and measure source code quality, and has been used by <a href="http://zeroturnaround.com/rebellabs/developers-guide-static-code-analysis-findbugs-checkstyle-pmd-coverity-sonarqube/">many companies</a>, I will try it in the next step.</p>
 ]]></content>
   </entry>
   
