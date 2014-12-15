@@ -1,3 +1,10 @@
+---
+layout: post
+title: "Java Code Style and Static Analysis"
+date: 2014-12-15 11:42:09 -0800
+comments: true
+categories: Java
+---
 
 ##1. Checkstyle
 
