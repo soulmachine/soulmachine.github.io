@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>soulmachine</title>
+  <title>Create a Hadoop Compilation and Development Environment - soulmachine</title>
   <meta name="author" content="soulmachine">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.soulmachine.me">
+  <link rel="canonical" href="http://www.soulmachine.me/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="soulmachine" type="application/atom+xml">
@@ -77,15 +77,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/">Create a Hadoop Compilation and Development Environment</a></h1>
+      <h1 class="entry-title">Create a Hadoop Compilation and Development Environment</h1>
     
     
       <p class="meta">
@@ -103,15 +100,15 @@
 
 <time datetime="2015-01-29T11:56:41-08:00" pubdate data-updated="true">Jan 29<span>th</span>, 2015</time>
         
-           | <a href="/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/#disqus_thread"
-             data-disqus-identifier="http://www.soulmachine.me/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/">Comments</a>
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://www.soulmachine.me">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>If you want to read the source code of Hadoop and dig into the internals of Hadoop, then you need to know how to compile the source code and use IDEs (such as Eclipse or IntelliJ Idea) to open the projects. This blog will introduce you how to create a Hadoop build and development environment.</p>
+<div class="entry-content"><p>If you want to read the source code of Hadoop and dig into the internals of Hadoop, then you need to know how to compile the source code and use IDEs (such as Eclipse or IntelliJ Idea) to open the projects. This blog will introduce you how to create a Hadoop build and development environment.</p>
 
 <p><strong>Environment</strong>: CentOS 6.6,  Oracle JDK 1.7.0_75</p>
 
@@ -143,137 +140,101 @@ export PATH=$FB_HOME/bin:$PATH
 
 <p>If you want to run <code>mvn compile findbugs:findbugs</code> then you need to install FindBugs.</p>
 
+<!-- more -->
+
+
+<h2>4. Install build tools</h2>
+
+<pre><code>sudo yum install -y gcc-c++ cmake autoconf automake
+</code></pre>
+
+<h2>5. Install native libraries packages</h2>
+
+<pre><code>sudo yum -y install  gcc-c++ lzo-devel  zlib-devel libtool openssl-devel
+</code></pre>
+
+<p>Optional:</p>
+
+<pre><code>sudo yum install -y snappy-devel
+sudo yum install -y svn
+</code></pre>
+
+<p>During the process of compilation, it will throw out some warning messages if there is no <code>svn</code> command.</p>
+
+<h2>5. Install Protobuf</h2>
+
+<pre><code>wget https://protobuf.googlecode.com/files/protobuf-2.5.0.tar.gz
+tar -zxf protobuf-2.5.0.tar.gz
+cd protobuf-2.5.0
+./configure
+make
+sudo make install
+rm -rf ./protobuf-2.5.0
+rm ./protobuf-2.5.0.tar.gz
+</code></pre>
+
+<p><strong>NOTE</strong>: The Protobuf version must be exactly 2.5.0, or the compilation will fail.</p>
+
+<h2>6. Download the source code</h2>
+
+<pre><code>git clone git@github.com:apache/hadoop.git
+</code></pre>
+
+<h2>7. Compile</h2>
+
+<p>Create binary distribution with native code and without documentation.</p>
+
+<pre><code>mvn clean package -Pdist,native -Dtar -DskipTests -Drequire.snappy -Drequire.openssl
+</code></pre>
+
+<h2>8. Install IntelliJ Idea</h2>
+
+<pre><code>wget http://download-cf.jetbrains.com/idea/ideaIC-14.0.3.tar.gz
+sudo tar -zxf ideaIC-14.0.3.tar.gz -C /opt
+Launch IntelliJ Idea, Create Desktop Entry
+</code></pre>
+
+<h2>9. Open projects in IntelliJ Idea</h2>
+
+<p>First you need to run</p>
+
+<pre><code>mvn install -DskipTests
+</code></pre>
+
+<p>Since some submodules of Hadoop depend on other submodules,  so you need to run <code>mvn install -DskipTests</code> to copy jars of Hadoop submodules to local <code>$HOME/.m2</code> , so that Maven won&rsquo;t download them from Internet. If you omit this step, Maven will try to download them from public Maven repository and will fail, because the newest version of Hadoop jars are not available in public Maven repository yet.</p>
+
+<p>Then click <code>File-&gt;Open</code> to open the <code>pom.xml</code> in the root directory of Hadoop repo.</p>
+
+<p><strong>Note</strong>: Don&rsquo;t use <code>mvn idea:idea</code> to generate IntelliJ Idea projects first , IntelliJ Idea can handle pom.xml quite well, besides, the <a href="http://maven.apache.org/plugins/maven-idea-plugin/">&ldquo;Maven IDEA Plugin&rdquo;</a> has already RETIRED.</p>
+
+<h2>10. Increase the memory for IntelliJ Idea(Optional)</h2>
+
+<p>There are many classes in Hadoop source code, if your IntelliJ hangs and doesn&rsquo;t respond from time to time, then you can try to give more memory to IntelliJ Idea by modifying the file <code>idea64.vmoptions</code> in the installation directory. Example below:</p>
+
+<pre><code>-Xms128m
+-Xmx4096m
+-XX:MaxPermSize=1024m
+</code></pre>
+
+<h2>Reference</h2>
+
+<ol>
+<li><a href="http://wiki.apache.org/hadoop/HowToContribute">HowToContribute</a></li>
+<li><a href="https://github.com/apache/hadoop/blob/trunk/BUILDING.txt">BUILDING.txt</a></li>
+<li><a href="http://vichargrave.com/create-a-hadoop-build-and-development-environment-for-hadoop/">Create a Hadoop Build and Development Environment</a></li>
+</ol>
+
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/">Read on &rarr;</a>
-    </footer>
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/15/java-code-style-and-static-analysis/">Java Code Style and Static Analysis</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
   
 
+<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
 
-<time datetime="2014-12-15T11:42:09-08:00" pubdate data-updated="true">Dec 15<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/12/15/java-code-style-and-static-analysis/#disqus_thread"
-             data-disqus-identifier="http://www.soulmachine.me/blog/2014/12/15/java-code-style-and-static-analysis/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>1. Checkstyle</h2>
-
-<p><a href="http://checkstyle.sourceforge.net/">CheckStyle</a> is a development tool to help programmers write Java code that adheres to a coding standard. It automates the process of checking Java code to spare humans of this boring (but important) task. This makes it ideal for projects that want to enforce a coding standard.</p>
-
-<p>Which Java code style to choose? Google has published a few coding standards, include <a href="http://google-styleguide.googlecode.com/svn/trunk/javaguide.html">Google Java Style</a>. Aditionally, there are xml configuration files for Eclipse and IntelliJ in the SVN repository, <a href="https://code.google.com/p/google-styleguide/source/browse/trunk">https://code.google.com/p/google-styleguide/source/browse/trunk</a>.</p>
-
-<p>Checkstyle Eclipse plugin has already used Google Java style by default, checkt it by clicking &ldquo;Window->Preferences->Checkstyle->Global Check Configurations&rdquo;, or at <a href="https://github.com/checkstyle/checkstyle/blob/master/google_checks.xml">https://github.com/checkstyle/checkstyle/blob/master/google_checks.xml</a>.</p>
-
-<h3>1.1 Checkstyle Eclipse Plugin</h3>
-
-<p>To check your coding style automatically in Eclipse, just install the Checkstyle Eclpise plugin. Launch Eclipse, click Menu &ldquo;Help &ndash;> Install New Software&rdquo;, input
-<a href="http://eclipse-cs.sf.net/update/">http://eclipse-cs.sf.net/update/</a>, then click &ldquo;Next&rdquo; to install the plugin.</p>
-
-<h3>1.2 Checkstyle Maven Plugin</h3>
-
-<p>Add the following lines to pom.xml to enable Checkstyle:</p>
-
-<pre><code>&lt;build&gt;
-    &lt;plugins&gt;
-        &lt;plugin&gt;
-            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
-            &lt;artifactId&gt;maven-checkstyle-plugin&lt;/artifactId&gt;
-            &lt;version&gt;2.13&lt;/version&gt;
-            &lt;dependencies&gt;
-                &lt;dependency&gt;
-                    &lt;groupId&gt;com.puppycrawl.tools&lt;/groupId&gt;
-                    &lt;artifactId&gt;checkstyle&lt;/artifactId&gt;
-                    &lt;version&gt;6.1.1&lt;/version&gt;
-                &lt;/dependency&gt;
-            &lt;/dependencies&gt;
-            &lt;executions&gt;
-                &lt;execution&gt;
-                    &lt;id&gt;checkstyle&lt;/id&gt;
-                    &lt;phase&gt;validate&lt;/phase&gt;
-                    &lt;configuration&gt;
-                        &lt;configLocation&gt;google_checks.xml&lt;/configLocation&gt;
-                        &lt;encoding&gt;UTF-8&lt;/encoding&gt;
-                        &lt;consoleOutput&gt;true&lt;/consoleOutput&gt;
-                        &lt;failsOnError&gt;true&lt;/failsOnError&gt;
-                        &lt;includeTestSourceDirectory&gt;true&lt;/includeTestSourceDirectory&gt;
-                    &lt;/configuration&gt;
-                    &lt;goals&gt;
-                        &lt;goal&gt;checkstyle&lt;/goal&gt;
-                    &lt;/goals&gt;
-                &lt;/execution&gt;
-            &lt;/executions&gt;
-        &lt;/plugin&gt;
-    &lt;/plugins&gt;
-&lt;/build&gt;
-&lt;reporting&gt;
-    &lt;plugins&gt;
-        &lt;plugin&gt;
-            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
-            &lt;artifactId&gt;maven-checkstyle-plugin&lt;/artifactId&gt;
-            &lt;version&gt;2.13&lt;/version&gt;
-            &lt;configuration&gt;
-                &lt;configLocation&gt;https://raw.githubusercontent.com/checkstyle/checkstyle/master/google_checks.xml&lt;/configLocation&gt;
-            &lt;/configuration&gt;
-        &lt;/plugin&gt;
-        &lt;plugin&gt;
-            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
-            &lt;artifactId&gt;maven-jxr-plugin&lt;/artifactId&gt;
-            &lt;version&gt;2.5&lt;/version&gt;
-        &lt;/plugin&gt;
-    &lt;/plugins&gt;
-&lt;/reporting&gt;
-</code></pre>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/15/java-code-style-and-static-analysis/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/01/28/restore-octopress-at-a-new-computer/">Restore Octopress at a New Computer</a></h1>
-    
-    
-      <p class="meta">
-        
 
 
 
@@ -285,74 +246,76 @@ export PATH=$FB_HOME/bin:$PATH
   
 
 
-<time datetime="2014-01-28T00:04:00-08:00" pubdate data-updated="true">Jan 28<span>th</span>, 2014</time>
-        
-           | <a href="/blog/2014/01/28/restore-octopress-at-a-new-computer/#disqus_thread"
-             data-disqus-identifier="http://www.soulmachine.me/blog/2014/01/28/restore-octopress-at-a-new-computer/">Comments</a>
-        
-      </p>
+<time datetime="2015-01-29T11:56:41-08:00" pubdate data-updated="true">Jan 29<span>th</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/hadoop/'>Hadoop</a>
+  
+</span>
+
+
+    </p>
     
-  </header>
+      <!-- AddThis Smart Layers BEGIN -->
+<!-- Go to http://www.addthis.com/get/smart-layers to customize -->
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517919846a2b41be"></script>
+<script type="text/javascript">
+  addthis.layers({
+    'theme' : 'transparent',
+    'share' : {
+      'position' : 'left',
+      'numPreferredServices' : 5
+    }, 
+    'follow' : {
+      'services' : [
+        {'service': 'facebook', 'id': 'soulmachine'},
+        {'service': 'twitter', 'id': 'soulmachine'},
+        {'service': 'linkedin', 'id': 'soulmachine'},
+        {'service': 'google_follow', 'id': '103519507226474510310'}
+      ]
+    },  
+    'whatsnext' : {},  
+    'recommended' : {} 
+  });
+</script>
+<!-- AddThis Smart Layers END -->
+<div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://www.soulmachine.me/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/" data-via="soulmachine" data-counturl="http://www.soulmachine.me/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/15/java-code-style-and-static-analysis/" title="Previous Post: Java Code Style and Static Analysis">&laquo; Java Code Style and Static Analysis</a>
+      
+      
+    </p>
+  </footer>
+</article>
 
-  <div class="entry-content"><p>OS: Ubuntu 12.04 64-bit</p>
-
-<h2>1. Install ruby</h2>
-
-<h3>1.1 Install ruby via RVM</h3>
-
-<pre><code>$ \curl -sSL https://get.rvm.io | bash -s stable --ruby
-</code></pre>
-
-<h3>1.2 <a href="https://rvm.io/integration/gnome-terminal">Integrating RVM with gnome-terminal</a></h3>
-
-<p><code>/etc/profile</code>, <code>~/.bash_profile</code> are for login shell, and <code>~/.bashrc</code> is for interactive shell, and RVM&rsquo;s path is added to <code>~/.bash_profile</code>, so you need to set the shell as a login shell.</p>
-
-<h3>1.3 Give it a try</h3>
-
-<p>Exit current shell, and open a new shell,</p>
-
-<pre><code>ruby -v
-</code></pre>
-
-<p>You have successfully installed ruby.</p>
-
-<h2>2. Install Python</h2>
-
-<pre><code>$ sudo apt-get install -y python
-</code></pre>
-
-<p>Because <a href="http://pygments.org/">Pygments</a> syntax highlighting needs Python.</p>
-
-<h2>3. Clone your blog to the new machine</h2>
-
-<p>First you need to clone the <code>source</code> branch to the local octopress folder.</p>
-
-<pre><code>$ git clone -b source git@github.com:username/username.github.com.git octopress
-</code></pre>
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
 
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/01/28/restore-octopress-at-a-new-computer/">Read on &rarr;</a>
-    </footer>
-  
 
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
 <aside class="sidebar">
   
     <section>
   <h1>About Me</h1>
-  <p>Spark, Machine Learning, Scala, <a href="/about">more&#8230;</a></p>
+  <p>Spark, Machine Learning, Scala, <a href="/about">more...</a></p>
 </section>
 <section>
   <h1>Categories</h1>
@@ -425,6 +388,7 @@ export PATH=$FB_HOME/bin:$PATH
   
 </aside>
 
+
     </div>
   </div>
   <footer role="contentinfo"><!-- mathjax config similar to math.stackexchange -->
@@ -454,7 +418,10 @@ MathJax.Hub.Config({
       var disqus_shortname = 'soulmachine';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://www.soulmachine.me/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/';
+        var disqus_url = 'http://www.soulmachine.me/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

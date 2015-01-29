@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Hadoop | soulmachine]]></title>
+  <link href="http://www.soulmachine.me/blog/categories/hadoop/atom.xml" rel="self"/>
+  <link href="http://www.soulmachine.me/"/>
+  <updated>2015-01-29T12:00:43-08:00</updated>
+  <id>http://www.soulmachine.me/</id>
+  <author>
+    <name><![CDATA[soulmachine]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Create a Hadoop Compilation and Development Environment]]></title>
+    <link href="http://www.soulmachine.me/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/"/>
+    <updated>2015-01-29T11:56:41-08:00</updated>
+    <id>http://www.soulmachine.me/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment</id>
+    <content type="html"><![CDATA[<p>If you want to read the source code of Hadoop and dig into the internals of Hadoop, then you need to know how to compile the source code and use IDEs (such as Eclipse or IntelliJ Idea) to open the projects. This blog will introduce you how to create a Hadoop build and development environment.</p>
+
+<p><strong>Environment</strong>: CentOS 6.6,  Oracle JDK 1.7.0_75</p>
+
+<h2>1. Install Oracle JDK 7</h2>
+
+<pre><code>Download jdk-7u75-linux-x64.rpm
+sudo yum localinstall -y ./jdk-7u75-linux-x64.rpm
+</code></pre>
+
+<p>For now if you use JDK 8 to compile the source code of Hadoop, it will fail because the javadoc  in Java 8 is considerably more strict than the one in earlier version, see more detailes <a href="http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html">here</a></p>
+
+<h2>2. Install Maven</h2>
+
+<pre><code>wget http://mirrors.gigenet.com/apache/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+sudo tar -zxf apache-maven-3.2.5-bin.tar.gz -C /opt
+sudo vim /etc/profile
+export M2_HOME=/opt/apache-maven-3.2.5
+export PATH=$M2_HOME/bin:$PATH
+</code></pre>
+
+<h2>3. Install FindBugs(Optional)</h2>
+
+<pre><code>wget http://iweb.dl.sourceforge.net/project/findbugs/findbugs/3.0.0/findbugs-3.0.0.tar.gz
+sudo tar -zxf findbugs-3.0.0.tar.gz -C /opt
+sudo vim /etc/profile
+export FB_HOME=/opt/findbugs-3.0.0
+export PATH=$FB_HOME/bin:$PATH
+</code></pre>
+
+<p>If you want to run <code>mvn compile findbugs:findbugs</code> then you need to install FindBugs.</p>
+
+<!-- more -->
+
+
+<h2>4. Install build tools</h2>
+
+<pre><code>sudo yum install -y gcc-c++ cmake autoconf automake
+</code></pre>
+
+<h2>5. Install native libraries packages</h2>
+
+<pre><code>sudo yum -y install  gcc-c++ lzo-devel  zlib-devel libtool openssl-devel
+</code></pre>
+
+<p>Optional:</p>
+
+<pre><code>sudo yum install -y snappy-devel
+sudo yum install -y svn
+</code></pre>
+
+<p>During the process of compilation, it will throw out some warning messages if there is no <code>svn</code> command.</p>
+
+<h2>5. Install Protobuf</h2>
+
+<pre><code>wget https://protobuf.googlecode.com/files/protobuf-2.5.0.tar.gz
+tar -zxf protobuf-2.5.0.tar.gz
+cd protobuf-2.5.0
+./configure
+make
+sudo make install
+rm -rf ./protobuf-2.5.0
+rm ./protobuf-2.5.0.tar.gz
+</code></pre>
+
+<p><strong>NOTE</strong>: The Protobuf version must be exactly 2.5.0, or the compilation will fail.</p>
+
+<h2>6. Download the source code</h2>
+
+<pre><code>git clone git@github.com:apache/hadoop.git
+</code></pre>
+
+<h2>7. Compile</h2>
+
+<p>Create binary distribution with native code and without documentation.</p>
+
+<pre><code>mvn clean package -Pdist,native -Dtar -DskipTests -Drequire.snappy -Drequire.openssl
+</code></pre>
+
+<h2>8. Install IntelliJ Idea</h2>
+
+<pre><code>wget http://download-cf.jetbrains.com/idea/ideaIC-14.0.3.tar.gz
+sudo tar -zxf ideaIC-14.0.3.tar.gz -C /opt
+Launch IntelliJ Idea, Create Desktop Entry
+</code></pre>
+
+<h2>9. Open projects in IntelliJ Idea</h2>
+
+<p>First you need to run</p>
+
+<pre><code>mvn install -DskipTests
+</code></pre>
+
+<p>Since some submodules of Hadoop depend on other submodules,  so you need to run <code>mvn install -DskipTests</code> to copy jars of Hadoop submodules to local <code>$HOME/.m2</code> , so that Maven won&rsquo;t download them from Internet. If you omit this step, Maven will try to download them from public Maven repository and will fail, because the newest version of Hadoop jars are not available in public Maven repository yet.</p>
+
+<p>Then click <code>File-&gt;Open</code> to open the <code>pom.xml</code> in the root directory of Hadoop repo.</p>
+
+<p><strong>Note</strong>: Don&rsquo;t use <code>mvn idea:idea</code> to generate IntelliJ Idea projects first , IntelliJ Idea can handle pom.xml quite well, besides, the <a href="http://maven.apache.org/plugins/maven-idea-plugin/">&ldquo;Maven IDEA Plugin&rdquo;</a> has already RETIRED.</p>
+
+<h2>10. Increase the memory for IntelliJ Idea(Optional)</h2>
+
+<p>There are many classes in Hadoop source code, if your IntelliJ hangs and doesn&rsquo;t respond from time to time, then you can try to give more memory to IntelliJ Idea by modifying the file <code>idea64.vmoptions</code> in the installation directory. Example below:</p>
+
+<pre><code>-Xms128m
+-Xmx4096m
+-XX:MaxPermSize=1024m
+</code></pre>
+
+<h2>Reference</h2>
+
+<ol>
+<li><a href="http://wiki.apache.org/hadoop/HowToContribute">HowToContribute</a></li>
+<li><a href="https://github.com/apache/hadoop/blob/trunk/BUILDING.txt">BUILDING.txt</a></li>
+<li><a href="http://vichargrave.com/create-a-hadoop-build-and-development-environment-for-hadoop/">Create a Hadoop Build and Development Environment</a></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+</feed>
