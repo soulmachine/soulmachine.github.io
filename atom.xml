@@ -4,7 +4,7 @@
   <title><![CDATA[soulmachine]]></title>
   <link href="http://www.soulmachine.me/atom.xml" rel="self"/>
   <link href="http://www.soulmachine.me/"/>
-  <updated>2015-01-29T12:00:43-08:00</updated>
+  <updated>2015-01-29T12:25:28-08:00</updated>
   <id>http://www.soulmachine.me/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,19 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Debug Hadoop Applications With IntelliJ]]></title>
+    <link href="http://www.soulmachine.me/blog/2015/01/30/debug-hadoop-applications-with-intellij/"/>
+    <updated>2015-01-30T12:15:18-08:00</updated>
+    <id>http://www.soulmachine.me/blog/2015/01/30/debug-hadoop-applications-with-intellij</id>
+    <content type="html"><![CDATA[<p>In my previous blog, I explained how to <a href="http://172.16.254.165:4000/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/">Create a Hadoop Compilation and Development Environment</a> so that you can build the Hadoop source code you get from the Apache Hadoop git repository.</p>
+
+<p>However, not everyone need to dig into the source code, normally more people will just call the Hadoop APIs to write a MapReduce program. When you write a MapReduce program, you rarely get it right for one time, then you need to debug your code.</p>
+
+<p>This time I&rsquo;ll show you how to debug your Hadoop applications using the IntelliJ IDE.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Create a Hadoop Compilation and Development Environment]]></title>
@@ -132,8 +145,11 @@ Launch IntelliJ Idea, Create Desktop Entry
 <li><a href="http://wiki.apache.org/hadoop/HowToContribute">HowToContribute</a></li>
 <li><a href="https://github.com/apache/hadoop/blob/trunk/BUILDING.txt">BUILDING.txt</a></li>
 <li><a href="http://vichargrave.com/create-a-hadoop-build-and-development-environment-for-hadoop/">Create a Hadoop Build and Development Environment</a></li>
+<li><a href="http://blog.cloudera.com/blog/2014/06/how-to-create-an-intellij-idea-project-for-apache-hadoop/">How-to: Create an IntelliJ IDEA Project for Apache Hadoop</a></li>
 </ol>
 
+
+<p>In my next blog, I&rsquo;ll explain how to <a href="http://172.16.254.165:4000/blog/2015/01/30/debug-hadoop-applications-with-intellij/">Debug Hadoop Applications with IntelliJ</a></p>
 ]]></content>
   </entry>
   
