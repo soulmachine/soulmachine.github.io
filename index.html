@@ -116,8 +116,28 @@
 <p>However, not everyone need to dig into the source code, normally more people will just call the Hadoop APIs to write a MapReduce program. When you write a MapReduce program, you rarely get it right for one time, then you need to debug your code.</p>
 
 <p>This time I&rsquo;ll show you how to debug your Hadoop applications using the IntelliJ IDE.</p>
+
+<p><strong>Environment</strong>: CentOS 6.6, Oracle JDK 1.7.0_75, Maven 3.2.5, IntelliJ Idea 14.0.3</p>
+
+<h2>1. Create a MapReduce Maven project</h2>
+
+<p>First we need to create a MapReduce program to debug. Let&rsquo;s use the simplest example, WordCount, for demonstration.  The source code is here <a href="http://wiki.apache.org/hadoop/WordCount">WordCount &ndash; Hadoop Wiki</a>.</p>
+
+<h3>1.1 Generate the Maven project</h3>
+
+<p>Use the <code>mvn</code> command to generate the scaffolding for the project.</p>
+
+<pre><code>mvn archetype:generate -DgroupId=me.soulmachine -DartifactId=wordcount -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+</code></pre>
+
+<p>Delete the <code>src/test/java/me/soulmachine/AppTest.java</code> file, as it will not be used in this example, and rename the <code>src/main/java/me/soulmachine/App.java</code> file to <code>WordCount.java</code>.</p>
+
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/30/debug-hadoop-applications-with-intellij/">Read on &rarr;</a>
+    </footer>
   
 
 
