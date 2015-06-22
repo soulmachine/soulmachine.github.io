@@ -9,7 +9,7 @@
   <meta name="author" content="soulmachine">
 
   
-  <meta name="description" content="In my previous blog, I explained how to Create a Hadoop Compilation and Development Environment so that you can build the Hadoop source code you get &hellip;">
+  <meta name="description" content="A simple solution We know that Jackson is very convenient to deserialize a JSON string into a ArrayList, HashMap or POJO object. But how to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +79,195 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/">Deserialize a JSON String to a Binary Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-22T01:36:02-07:00" pubdate data-updated="true">Jun 22<span>nd</span>, 2015</time>
+        
+           | <a href="/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/#disqus_thread"
+             data-disqus-identifier="http://www.soulmachine.me/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>A simple solution</h2>
+
+<p>We know that Jackson is very convenient to deserialize a JSON string into a <code>ArrayList</code>, <code>HashMap</code> or POJO object.</p>
+
+<p>But how to deserialize a JSON String to a binary tree?</p>
+
+<p>The definition of binary tree node is as follows:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BinaryTreeNode</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">E</span> <span class="n">value</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">BinaryTreeNode</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">left</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">BinaryTreeNode</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">right</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The JSON String is as follows:</p>
+
+<pre><code>{
+   "value": 2,
+   "left": {
+    "value": 1,
+    "left": null,
+    "right": null
+  },
+  "right": {
+    "value": 10,
+    "left": {
+      "value": 5,
+      "left": null,
+      "right": null
+    },
+    "right": null
+  }
+}
+</code></pre>
+
+<p>The above JSON string represents a binary tree as the following:</p>
+
+<pre><code>  2
+ / \
+1   10
+   /
+  5
+</code></pre>
+
+<p>The solution is quite simpler, since JSON can express tree naturally, Jackson can deal with recursive tree directly. Just annotate a constructor with <code>JsonCreator</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">BinaryTreeNode</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">E</span> <span class="n">value</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">BinaryTreeNode</span> <span class="n">left</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">BinaryTreeNode</span> <span class="n">right</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@JsonCreator</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">BinaryTreeNode</span><span class="o">(</span><span class="nd">@JsonProperty</span><span class="o">(</span><span class="s">&quot;value&quot;</span><span class="o">)</span> <span class="kd">final</span> <span class="n">E</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Let&rsquo;s write a unite test to try it:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/21/deserialize-a-json-array-to-a-singly-linked-list/">Deserialize a JSON Array to a Singly Linked List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-21T21:19:53-07:00" pubdate data-updated="true">Jun 21<span>st</span>, 2015</time>
+        
+           | <a href="/blog/2015/06/21/deserialize-a-json-array-to-a-singly-linked-list/#disqus_thread"
+             data-disqus-identifier="http://www.soulmachine.me/blog/2015/06/21/deserialize-a-json-array-to-a-singly-linked-list/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>We know that Jackson is very convenient to deserialize a JSON string into a <code>ArrayList</code>, <code>HashMap</code> or POJO object.</p>
+
+<p>But how to deserialize a JSON array, such as <code>[1,2,3,4,5]</code> to a singly linked list?</p>
+
+<p>The definition of singly linked list is as follows:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SinglyLinkedListNode</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">E</span> <span class="n">value</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">SinglyLinkedListNode</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">next</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Well, the solution is quite simpler than I expected:  Just make <code>SinglyLinkedListNode</code> implement <code>java.util.List</code> or <code>java.util.Collection</code> , Jackson will automatically deserialize it!</p>
+
+<p>This idea comes from <a href="https://github.com/cowtowncoder">Tatu Saloranta</a>, the discussion post is <a href="https://groups.google.com/forum/#!topic/jackson-user/EbltfyXSVV8">here</a>, special thanks to him!</p>
+
+<p>Here is the complete code of <code>SinglyLinkedListNode</code>:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/06/21/deserialize-a-json-array-to-a-singly-linked-list/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -419,7 +608,7 @@ export PATH=$FB_HOME/bin:$PATH
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/hadoop/'>Hadoop (2)</a></li><li><a href='/blog/categories/java/'>Java (1)</a></li><li><a href='/blog/categories/tools/'>Tools (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/hadoop/'>Hadoop (2)</a></li><li><a href='/blog/categories/jackson/'>Jackson (2)</a></li><li><a href='/blog/categories/java/'>Java (3)</a></li><li><a href='/blog/categories/json/'>JSON (2)</a></li><li><a href='/blog/categories/tools/'>Tools (1)</a></li></ul>
 </section>
 <section>
   <h2>Blogroll</h2>
@@ -464,6 +653,14 @@ export PATH=$FB_HOME/bin:$PATH
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/">Deserialize a JSON String to a Binary Tree</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/21/deserialize-a-json-array-to-a-singly-linked-list/">Deserialize a JSON Array to a Singly Linked List</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/30/debug-hadoop-applications-with-intellij/">Debug Hadoop Applications With IntelliJ</a>
       </li>
     
@@ -473,10 +670,6 @@ export PATH=$FB_HOME/bin:$PATH
     
       <li class="post">
         <a href="/blog/2014/12/15/java-code-style-and-static-analysis/">Java Code Style and Static Analysis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/01/28/restore-octopress-at-a-new-computer/">Restore Octopress at a New Computer</a>
       </li>
     
   </ul>
