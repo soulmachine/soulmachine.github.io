@@ -4,7 +4,7 @@
   <title><![CDATA[soulmachine]]></title>
   <link href="http://www.soulmachine.me/atom.xml" rel="self"/>
   <link href="http://www.soulmachine.me/"/>
-  <updated>2015-06-22T02:27:45-07:00</updated>
+  <updated>2015-06-22T02:32:42-07:00</updated>
   <id>http://www.soulmachine.me/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -1516,7 +1516,7 @@
 
 <h2>Related Posts</h2>
 
-<p><a href="http://www.soulmachine.me/blog/2015/06/22/deserialize-a-json-array-to-a-singly-linked-list/deserialize-a-json-string-to-a-binary-tree/">Deserialize a JSON String to a Binary Tree</a></p>
+<p><a href="http://www.soulmachine.me/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/">Deserialize a JSON String to a Binary Tree</a></p>
 ]]></content>
   </entry>
   
