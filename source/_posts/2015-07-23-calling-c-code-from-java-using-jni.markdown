@@ -6,29 +6,27 @@ comments: true
 categories: Java
 ---
 
-This blog is a copy of <http://stuf.ro/calling-c-code-from-java-using-jni> with some errors fixed.
+This blog is a fork of <http://stuf.ro/calling-c-code-from-java-using-jni> with some errors fixed and C++ support added.
 
-In this tutorial we'll be creating a Java application calling code from a native library. We'll have a Java application called HelloWorld which will call the function helloFromC from a shared library named ctest, using Java Native Interface.
+In this tutorial we'll be creating a Java application calling code from a native library. We'll have a Java application called `HelloWorld` which will call the function `helloFromC` from a shared library named `ctest`, using Java Native Interface.
 
-First off, we'll create a file named HelloWorld.java to contain the HelloWorld class.
+First off, we'll create a file named `HelloWorld.java` to contain the `HelloWorld` class.
 
 ```java
 /* HelloWorld.java */
 
 public class HelloWorld {
     native void helloFromC(); /* (1) */
-    static {
-        System.loadLibrary("ctest"); /* (2) */
-    }
     static public void main(String argv[]) {
+        System.loadLibrary("ctest"); /* (2) */
         HelloWorld helloWorld = new HelloWorld();
         helloWorld.helloFromC(); /* (3) */
     }
 }
 ```
 
-1. Make the virtual machine aware of a function defined externally, named "helloFromC"
-2. Load an external library called "ctest" (which will need to define this function)
+1. Make the JVM aware of a function defined externally, named `helloFromC`
+2. Load an external library called `ctest` (which will need to define this function)
 3. Call the function we talked about
 
 Even though we didn't write any library yet, we can still compile the Java application, because this is a dependency that will be resolved at runtime. So, let's compile the application:
@@ -105,7 +103,7 @@ JNIEXPORT void JNICALL Java_HelloWorld_helloFromC
 
 Now that we have the file, let's compile it and create a native library. This part is system dependent, but the only things that change really are the extension of the generated library file and the path to the jni.h include.
 
-	gcc -o libctest.so -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux  ctest.c
+	gcc -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux ctest.c -o libctest.so
 
 Replace .so with .dylib if you're on a Mac, or .dll if you're on Windows (remove the lib part from the file name as well if you're on Windows). Also, replace /path/to/jdk/headers with the full path to the directory containing the file jni.h. If you don't know where that is, you can use the locate jni.h command on UNIX-like systems.
 
@@ -119,8 +117,38 @@ If everything works correctly, you should see:
 
 	Hello from C!
 
+**If we want to call C++ function, we need to make two changes. **
+
+First,  rename the file `ctest.c` to `ctest.cpp` and append `extern "C"` to every function that we want to call from Java code.
+
+```c++
+/* ctest.cpp */
+
+#include <jni.h>
+#include <stdio.h>
+
+extern "C" JNIEXPORT void JNICALL Java_HelloWorld_helloFromC
+  (JNIEnv * env, jobject jobj)
+{
+    printf("Hello from C++!\n");
+}
+```
+
+Second, use `g++` instead of `gcc`, and link the Standard C++ library by adding the option `-lstdc++` to g++.
+
+    g++ -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux -lstdc++ ctest.cpp -o libctest.so
+
+To see if it works, run the application:
+
+	java -cp . -Djava.library.path=. HelloWorld
+
+If everything works correctly, you should see:
+
+	Hello from C++!
+
 ## Reference
 
 1. [Calling C code from Java using JNI](http://stuf.ro/calling-c-code-from-java-using-jni)
 2. [java.lang.UnsatisfiedLinkError with JNI and c](http://stackoverflow.com/questions/15090620/java-lang-unsatisfiedlinkerror-with-jni-and-c)
+3. [JNI change C to C++](http://stackoverflow.com/questions/12353424/jni-change-c-to-c)
 
