@@ -9,7 +9,7 @@
   <meta name="author" content="soulmachine">
 
   
-  <meta name="description" content="This blog is a copy of http://stuf.ro/calling-c-code-from-java-using-jni with some errors fixed. In this tutorial we&rsquo;ll be creating a Java &hellip;">
+  <meta name="description" content="This blog is a fork of http://stuf.ro/calling-c-code-from-java-using-jni with some errors fixed and C++ support added. In this tutorial we&rsquo;ll &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -108,11 +108,11 @@
   </header>
 
 
-<div class="entry-content"><p>This blog is a copy of <a href="http://stuf.ro/calling-c-code-from-java-using-jni">http://stuf.ro/calling-c-code-from-java-using-jni</a> with some errors fixed.</p>
+<div class="entry-content"><p>This blog is a fork of <a href="http://stuf.ro/calling-c-code-from-java-using-jni">http://stuf.ro/calling-c-code-from-java-using-jni</a> with some errors fixed and C++ support added.</p>
 
-<p>In this tutorial we&rsquo;ll be creating a Java application calling code from a native library. We&rsquo;ll have a Java application called HelloWorld which will call the function helloFromC from a shared library named ctest, using Java Native Interface.</p>
+<p>In this tutorial we&rsquo;ll be creating a Java application calling code from a native library. We&rsquo;ll have a Java application called <code>HelloWorld</code> which will call the function <code>helloFromC</code> from a shared library named <code>ctest</code>, using Java Native Interface.</p>
 
-<p>First off, we&rsquo;ll create a file named HelloWorld.java to contain the HelloWorld class.</p>
+<p>First off, we&rsquo;ll create a file named <code>HelloWorld.java</code> to contain the <code>HelloWorld</code> class.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -124,16 +124,12 @@
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
 </pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/* HelloWorld.java */</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
 </span><span class='line'>    <span class="kd">native</span> <span class="kt">void</span> <span class="nf">helloFromC</span><span class="o">();</span> <span class="cm">/* (1) */</span>
-</span><span class='line'>    <span class="kd">static</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">loadLibrary</span><span class="o">(</span><span class="s">&quot;ctest&quot;</span><span class="o">);</span> <span class="cm">/* (2) */</span>
-</span><span class='line'>    <span class="o">}</span>
 </span><span class='line'>    <span class="kd">static</span> <span class="kd">public</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">argv</span><span class="o">[])</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">loadLibrary</span><span class="o">(</span><span class="s">&quot;ctest&quot;</span><span class="o">);</span> <span class="cm">/* (2) */</span>
 </span><span class='line'>        <span class="n">HelloWorld</span> <span class="n">helloWorld</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HelloWorld</span><span class="o">();</span>
 </span><span class='line'>        <span class="n">helloWorld</span><span class="o">.</span><span class="na">helloFromC</span><span class="o">();</span> <span class="cm">/* (3) */</span>
 </span><span class='line'>    <span class="o">}</span>
@@ -142,8 +138,8 @@
 
 
 <ol>
-<li>Make the virtual machine aware of a function defined externally, named &ldquo;helloFromC&rdquo;</li>
-<li>Load an external library called &ldquo;ctest&rdquo; (which will need to define this function)</li>
+<li>Make the JVM aware of a function defined externally, named <code>helloFromC</code></li>
+<li>Load an external library called <code>ctest</code> (which will need to define this function)</li>
 <li>Call the function we talked about</li>
 </ol>
 
@@ -263,7 +259,7 @@ Exception in thread "main" java.lang.UnsatisfiedLinkError: no ctest in java.libr
 
 <p>Now that we have the file, let&rsquo;s compile it and create a native library. This part is system dependent, but the only things that change really are the extension of the generated library file and the path to the jni.h include.</p>
 
-<pre><code>gcc -o libctest.so -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux  ctest.c
+<pre><code>gcc -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux ctest.c -o libctest.so
 </code></pre>
 
 <p>Replace .so with .dylib if you&rsquo;re on a Mac, or .dll if you&rsquo;re on Windows (remove the lib part from the file name as well if you&rsquo;re on Windows). Also, replace /path/to/jdk/headers with the full path to the directory containing the file jni.h. If you don&rsquo;t know where that is, you can use the locate jni.h command on UNIX-like systems.</p>
@@ -280,11 +276,54 @@ Exception in thread "main" java.lang.UnsatisfiedLinkError: no ctest in java.libr
 <pre><code>Hello from C!
 </code></pre>
 
+<p><strong>If we want to call C++ function, we need to make two changes. </strong></p>
+
+<p>First,  rename the file <code>ctest.c</code> to <code>ctest.cpp</code> and append <code>extern "C"</code> to every function that we want to call from Java code.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c++'><span class='line'><span class="cm">/* ctest.cpp */</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#include &lt;jni.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="n">JNIEXPORT</span> <span class="kt">void</span> <span class="n">JNICALL</span> <span class="n">Java_HelloWorld_helloFromC</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">JNIEnv</span> <span class="o">*</span> <span class="n">env</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">jobj</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Hello from C++!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Second, use <code>g++</code> instead of <code>gcc</code>, and link the Standard C++ library by adding the option <code>-lstdc++</code> to g++.</p>
+
+<pre><code>g++ -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux -lstdc++ ctest.cpp -o libctest.so
+</code></pre>
+
+<p>To see if it works, run the application:</p>
+
+<pre><code>java -cp . -Djava.library.path=. HelloWorld
+</code></pre>
+
+<p>If everything works correctly, you should see:</p>
+
+<pre><code>Hello from C++!
+</code></pre>
+
 <h2>Reference</h2>
 
 <ol>
 <li><a href="http://stuf.ro/calling-c-code-from-java-using-jni">Calling C code from Java using JNI</a></li>
 <li><a href="http://stackoverflow.com/questions/15090620/java-lang-unsatisfiedlinkerror-with-jni-and-c">java.lang.UnsatisfiedLinkError with JNI and c</a></li>
+<li><a href="http://stackoverflow.com/questions/12353424/jni-change-c-to-c">JNI change C to C++</a></li>
 </ol>
 
 </div>

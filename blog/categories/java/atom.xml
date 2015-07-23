@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java | soulmachine]]></title>
   <link href="http://www.soulmachine.me/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://www.soulmachine.me/"/>
-  <updated>2015-07-23T02:32:19-07:00</updated>
+  <updated>2015-07-23T13:53:56-07:00</updated>
   <id>http://www.soulmachine.me/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -18,11 +18,11 @@
     <link href="http://www.soulmachine.me/blog/2015/07/23/calling-c-code-from-java-using-jni/"/>
     <updated>2015-07-23T02:28:28-07:00</updated>
     <id>http://www.soulmachine.me/blog/2015/07/23/calling-c-code-from-java-using-jni</id>
-    <content type="html"><![CDATA[<p>This blog is a copy of <a href="http://stuf.ro/calling-c-code-from-java-using-jni">http://stuf.ro/calling-c-code-from-java-using-jni</a> with some errors fixed.</p>
+    <content type="html"><![CDATA[<p>This blog is a fork of <a href="http://stuf.ro/calling-c-code-from-java-using-jni">http://stuf.ro/calling-c-code-from-java-using-jni</a> with some errors fixed and C++ support added.</p>
 
-<p>In this tutorial we&rsquo;ll be creating a Java application calling code from a native library. We&rsquo;ll have a Java application called HelloWorld which will call the function helloFromC from a shared library named ctest, using Java Native Interface.</p>
+<p>In this tutorial we&rsquo;ll be creating a Java application calling code from a native library. We&rsquo;ll have a Java application called <code>HelloWorld</code> which will call the function <code>helloFromC</code> from a shared library named <code>ctest</code>, using Java Native Interface.</p>
 
-<p>First off, we&rsquo;ll create a file named HelloWorld.java to contain the HelloWorld class.</p>
+<p>First off, we&rsquo;ll create a file named <code>HelloWorld.java</code> to contain the <code>HelloWorld</code> class.</p>
 
 <p>```java
 /<em> HelloWorld.java </em>/</p>
@@ -30,10 +30,8 @@
 <p>public class HelloWorld {</p>
 
 <pre><code>native void helloFromC(); /* (1) */
-static {
-    System.loadLibrary("ctest"); /* (2) */
-}
 static public void main(String argv[]) {
+    System.loadLibrary("ctest"); /* (2) */
     HelloWorld helloWorld = new HelloWorld();
     helloWorld.helloFromC(); /* (3) */
 }
@@ -43,8 +41,8 @@ static public void main(String argv[]) {
 ```</p>
 
 <ol>
-<li>Make the virtual machine aware of a function defined externally, named &ldquo;helloFromC&rdquo;</li>
-<li>Load an external library called &ldquo;ctest&rdquo; (which will need to define this function)</li>
+<li>Make the JVM aware of a function defined externally, named <code>helloFromC</code></li>
+<li>Load an external library called <code>ctest</code> (which will need to define this function)</li>
 <li>Call the function we talked about</li>
 </ol>
 
@@ -142,7 +140,7 @@ JNIEXPORT void JNICALL Java_HelloWorld_helloFromC
 
 <p>Now that we have the file, let&rsquo;s compile it and create a native library. This part is system dependent, but the only things that change really are the extension of the generated library file and the path to the jni.h include.</p>
 
-<pre><code>gcc -o libctest.so -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux  ctest.c
+<pre><code>gcc -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux ctest.c -o libctest.so
 </code></pre>
 
 <p>Replace .so with .dylib if you&rsquo;re on a Mac, or .dll if you&rsquo;re on Windows (remove the lib part from the file name as well if you&rsquo;re on Windows). Also, replace /path/to/jdk/headers with the full path to the directory containing the file jni.h. If you don&rsquo;t know where that is, you can use the locate jni.h command on UNIX-like systems.</p>
@@ -159,11 +157,48 @@ JNIEXPORT void JNICALL Java_HelloWorld_helloFromC
 <pre><code>Hello from C!
 </code></pre>
 
+<p><strong>If we want to call C++ function, we need to make two changes. </strong></p>
+
+<p>First,  rename the file <code>ctest.c</code> to <code>ctest.cpp</code> and append <code>extern "C"</code> to every function that we want to call from Java code.</p>
+
+<p>```c++
+/<em> ctest.cpp </em>/</p>
+
+<h1>include &lt;jni.h></h1>
+
+<h1>include &lt;stdio.h></h1>
+
+<p>extern &ldquo;C&rdquo; JNIEXPORT void JNICALL Java_HelloWorld_helloFromC
+  (JNIEnv * env, jobject jobj)
+{</p>
+
+<pre><code>printf("Hello from C++!\n");
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Second, use <code>g++</code> instead of <code>gcc</code>, and link the Standard C++ library by adding the option <code>-lstdc++</code> to g++.</p>
+
+<pre><code>g++ -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux -lstdc++ ctest.cpp -o libctest.so
+</code></pre>
+
+<p>To see if it works, run the application:</p>
+
+<pre><code>java -cp . -Djava.library.path=. HelloWorld
+</code></pre>
+
+<p>If everything works correctly, you should see:</p>
+
+<pre><code>Hello from C++!
+</code></pre>
+
 <h2>Reference</h2>
 
 <ol>
 <li><a href="http://stuf.ro/calling-c-code-from-java-using-jni">Calling C code from Java using JNI</a></li>
 <li><a href="http://stackoverflow.com/questions/15090620/java-lang-unsatisfiedlinkerror-with-jni-and-c">java.lang.UnsatisfiedLinkError with JNI and c</a></li>
+<li><a href="http://stackoverflow.com/questions/12353424/jni-change-c-to-c">JNI change C to C++</a></li>
 </ol>
 
 ]]></content>
