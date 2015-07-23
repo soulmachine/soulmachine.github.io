@@ -1,0 +1,1097 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Compile and Run Java Source Code in Memory - soulmachine</title>
+  <meta name="author" content="soulmachine">
+
+  
+  <meta name="description" content="In this blog I will show you how to compile and run Java source code on the fly in memory. In other words, use Java as a script language. Here are &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.soulmachine.me/blog/2015/07/22/compile-and-run-java-source-code-in-memory">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="soulmachine" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-7583537-10']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">soulmachine</a></h1>
+  
+    <h2>Machine has soul.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:www.soulmachine.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="http://cn.soulmachine.me" target="_blank">中文博客</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Compile and Run Java Source Code in Memory</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-22T15:42:18-07:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2015</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://www.soulmachine.me">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>In this blog I will show you how to compile and run Java source code on the fly in memory. In other words, use Java as a script language.</p>
+
+<p>Here are the three source code files.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">me</span><span class="o">.</span><span class="na">soulmachine</span><span class="o">.</span><span class="na">compiler</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.PrintWriter</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.Writer</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.lang.reflect.Method</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.tools.*</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Simple interface to Java compiler using JSR 199 Compiler API.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MemoryJavaCompiler</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">javax</span><span class="o">.</span><span class="na">tools</span><span class="o">.</span><span class="na">JavaCompiler</span> <span class="n">tool</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">StandardJavaFileManager</span> <span class="n">stdManager</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">MemoryJavaCompiler</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">tool</span> <span class="o">=</span> <span class="n">ToolProvider</span><span class="o">.</span><span class="na">getSystemJavaCompiler</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">tool</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">&quot;Could not get Java compiler. Please, ensure that JDK is used instead of JRE.&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">stdManager</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="na">getStandardFileManager</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Compile a single static method.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Method</span> <span class="nf">compileStaticMethod</span><span class="o">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">methodName</span><span class="o">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">className</span><span class="o">,</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">String</span> <span class="n">source</span><span class="o">)</span>
+</span><span class='line'>        <span class="kd">throws</span> <span class="n">ClassNotFoundException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">classBytes</span> <span class="o">=</span> <span class="n">compile</span><span class="o">(</span><span class="n">className</span> <span class="o">+</span> <span class="s">&quot;.java&quot;</span><span class="o">,</span> <span class="n">source</span><span class="o">);</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">MemoryClassLoader</span> <span class="n">classLoader</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MemoryClassLoader</span><span class="o">(</span><span class="n">classBytes</span><span class="o">);</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Class</span> <span class="n">clazz</span> <span class="o">=</span> <span class="n">classLoader</span><span class="o">.</span><span class="na">loadClass</span><span class="o">(</span><span class="n">className</span><span class="o">);</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Method</span><span class="o">[]</span> <span class="n">methods</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="na">getDeclaredMethods</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">for</span> <span class="o">(</span><span class="kd">final</span> <span class="n">Method</span> <span class="n">method</span> <span class="o">:</span> <span class="n">methods</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">method</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">methodName</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(!</span><span class="n">method</span><span class="o">.</span><span class="na">isAccessible</span><span class="o">())</span> <span class="n">method</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">method</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">throw</span> <span class="k">new</span> <span class="nf">NoSuchMethodError</span><span class="o">(</span><span class="n">methodName</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">compile</span><span class="o">(</span><span class="n">String</span> <span class="n">fileName</span><span class="o">,</span> <span class="n">String</span> <span class="n">source</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nf">compile</span><span class="o">(</span><span class="n">fileName</span><span class="o">,</span> <span class="n">source</span><span class="o">,</span> <span class="k">new</span> <span class="n">PrintWriter</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">),</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * compile given String source and return bytecodes as a Map.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @param fileName source fileName to be used for error messages etc.</span>
+</span><span class='line'><span class="cm">     * @param source Java source as String</span>
+</span><span class='line'><span class="cm">     * @param err error writer where diagnostic messages are written</span>
+</span><span class='line'><span class="cm">     * @param sourcePath location of additional .java source files</span>
+</span><span class='line'><span class="cm">     * @param classPath location of additional .class files</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">compile</span><span class="o">(</span><span class="n">String</span> <span class="n">fileName</span><span class="o">,</span> <span class="n">String</span> <span class="n">source</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">Writer</span> <span class="n">err</span><span class="o">,</span> <span class="n">String</span> <span class="n">sourcePath</span><span class="o">,</span> <span class="n">String</span> <span class="n">classPath</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// to collect errors, warnings etc.</span>
+</span><span class='line'>        <span class="n">DiagnosticCollector</span><span class="o">&lt;</span><span class="n">JavaFileObject</span><span class="o">&gt;</span> <span class="n">diagnostics</span> <span class="o">=</span>
+</span><span class='line'>            <span class="k">new</span> <span class="n">DiagnosticCollector</span><span class="o">&lt;</span><span class="n">JavaFileObject</span><span class="o">&gt;();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// create a new memory JavaFileManager</span>
+</span><span class='line'>        <span class="n">MemoryJavaFileManager</span> <span class="n">fileManager</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MemoryJavaFileManager</span><span class="o">(</span><span class="n">stdManager</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// prepare the compilation unit</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">JavaFileObject</span><span class="o">&gt;</span> <span class="n">compUnits</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">JavaFileObject</span><span class="o">&gt;(</span><span class="mi">1</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">compUnits</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">fileManager</span><span class="o">.</span><span class="na">makeStringSource</span><span class="o">(</span><span class="n">fileName</span><span class="o">,</span> <span class="n">source</span><span class="o">));</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="nf">compile</span><span class="o">(</span><span class="n">compUnits</span><span class="o">,</span> <span class="n">fileManager</span><span class="o">,</span> <span class="n">err</span><span class="o">,</span> <span class="n">sourcePath</span><span class="o">,</span> <span class="n">classPath</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">compile</span><span class="o">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">JavaFileObject</span><span class="o">&gt;</span> <span class="n">compUnits</span><span class="o">,</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">MemoryJavaFileManager</span> <span class="n">fileManager</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">Writer</span> <span class="n">err</span><span class="o">,</span> <span class="n">String</span> <span class="n">sourcePath</span><span class="o">,</span> <span class="n">String</span> <span class="n">classPath</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// to collect errors, warnings etc.</span>
+</span><span class='line'>        <span class="n">DiagnosticCollector</span><span class="o">&lt;</span><span class="n">JavaFileObject</span><span class="o">&gt;</span> <span class="n">diagnostics</span> <span class="o">=</span>
+</span><span class='line'>            <span class="k">new</span> <span class="n">DiagnosticCollector</span><span class="o">&lt;</span><span class="n">JavaFileObject</span><span class="o">&gt;();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// javac options</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">options</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;();</span>
+</span><span class='line'>        <span class="n">options</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">&quot;-Xlint:all&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="c1">//       options.add(&quot;-g:none&quot;);</span>
+</span><span class='line'>        <span class="n">options</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">&quot;-deprecation&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">sourcePath</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">options</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">&quot;-sourcepath&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">options</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">sourcePath</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">classPath</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">options</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">&quot;-classpath&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">options</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">classPath</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// create a compilation task</span>
+</span><span class='line'>        <span class="n">javax</span><span class="o">.</span><span class="na">tools</span><span class="o">.</span><span class="na">JavaCompiler</span><span class="o">.</span><span class="na">CompilationTask</span> <span class="n">task</span> <span class="o">=</span>
+</span><span class='line'>            <span class="n">tool</span><span class="o">.</span><span class="na">getTask</span><span class="o">(</span><span class="n">err</span><span class="o">,</span> <span class="n">fileManager</span><span class="o">,</span> <span class="n">diagnostics</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">options</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">compUnits</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">task</span><span class="o">.</span><span class="na">call</span><span class="o">()</span> <span class="o">==</span> <span class="kc">false</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">PrintWriter</span> <span class="n">perr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PrintWriter</span><span class="o">(</span><span class="n">err</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">for</span> <span class="o">(</span><span class="n">Diagnostic</span> <span class="n">diagnostic</span> <span class="o">:</span> <span class="n">diagnostics</span><span class="o">.</span><span class="na">getDiagnostics</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">perr</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">diagnostic</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="n">perr</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">classBytes</span> <span class="o">=</span> <span class="n">fileManager</span><span class="o">.</span><span class="na">getClassBytes</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">fileManager</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">exp</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">classBytes</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">me</span><span class="o">.</span><span class="na">soulmachine</span><span class="o">.</span><span class="na">compiler</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.ByteArrayOutputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.FilterOutputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.OutputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.net.URI</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.nio.CharBuffer</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.HashMap</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.tools.FileObject</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.tools.ForwardingJavaFileManager</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.tools.JavaFileManager</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.tools.JavaFileObject</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.tools.JavaFileObject.Kind</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.tools.SimpleJavaFileObject</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * JavaFileManager that keeps compiled .class bytes in memory.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;unchecked&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="kd">final</span> <span class="kd">class</span> <span class="nc">MemoryJavaFileManager</span> <span class="kd">extends</span> <span class="n">ForwardingJavaFileManager</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/** Java source file extension. */</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">String</span> <span class="n">EXT</span> <span class="o">=</span> <span class="s">&quot;.java&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">classBytes</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">MemoryJavaFileManager</span><span class="o">(</span><span class="n">JavaFileManager</span> <span class="n">fileManager</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">fileManager</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">classBytes</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">getClassBytes</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">classBytes</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">classBytes</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">flush</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * A file object used to represent Java source coming from a string.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">StringInputBuffer</span> <span class="kd">extends</span> <span class="n">SimpleJavaFileObject</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">String</span> <span class="n">code</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">StringInputBuffer</span><span class="o">(</span><span class="n">String</span> <span class="n">fileName</span><span class="o">,</span> <span class="n">String</span> <span class="n">code</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">(</span><span class="n">toURI</span><span class="o">(</span><span class="n">fileName</span><span class="o">),</span> <span class="n">Kind</span><span class="o">.</span><span class="na">SOURCE</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">CharBuffer</span> <span class="nf">getCharContent</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">ignoreEncodingErrors</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">CharBuffer</span><span class="o">.</span><span class="na">wrap</span><span class="o">(</span><span class="n">code</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * A file object that stores Java bytecode into the classBytes map.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">class</span> <span class="nc">ClassOutputBuffer</span> <span class="kd">extends</span> <span class="n">SimpleJavaFileObject</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">ClassOutputBuffer</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">(</span><span class="n">toURI</span><span class="o">(</span><span class="n">name</span><span class="o">),</span> <span class="n">Kind</span><span class="o">.</span><span class="na">CLASS</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">OutputStream</span> <span class="nf">openOutputStream</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="k">new</span> <span class="nf">FilterOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">ByteArrayOutputStream</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">out</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'>                    <span class="n">ByteArrayOutputStream</span> <span class="n">bos</span> <span class="o">=</span> <span class="o">(</span><span class="n">ByteArrayOutputStream</span><span class="o">)</span><span class="n">out</span><span class="o">;</span>
+</span><span class='line'>                    <span class="n">classBytes</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">name</span><span class="o">,</span> <span class="n">bos</span><span class="o">.</span><span class="na">toByteArray</span><span class="o">());</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>            <span class="o">};</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">JavaFileObject</span> <span class="nf">getJavaFileForOutput</span><span class="o">(</span><span class="n">JavaFileManager</span><span class="o">.</span><span class="na">Location</span> <span class="n">location</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">String</span> <span class="n">className</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">Kind</span> <span class="n">kind</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">FileObject</span> <span class="n">sibling</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">kind</span> <span class="o">==</span> <span class="n">Kind</span><span class="o">.</span><span class="na">CLASS</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="k">new</span> <span class="nf">ClassOutputBuffer</span><span class="o">(</span><span class="n">className</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">getJavaFileForOutput</span><span class="o">(</span><span class="n">location</span><span class="o">,</span> <span class="n">className</span><span class="o">,</span> <span class="n">kind</span><span class="o">,</span> <span class="n">sibling</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">static</span> <span class="n">JavaFileObject</span> <span class="nf">makeStringSource</span><span class="o">(</span><span class="n">String</span> <span class="n">fileName</span><span class="o">,</span> <span class="n">String</span> <span class="n">code</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">StringInputBuffer</span><span class="o">(</span><span class="n">fileName</span><span class="o">,</span> <span class="n">code</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">static</span> <span class="n">URI</span> <span class="nf">toURI</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">name</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">file</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">file</span><span class="o">.</span><span class="na">toURI</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                <span class="kd">final</span> <span class="n">StringBuilder</span> <span class="n">newUri</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringBuilder</span><span class="o">();</span>
+</span><span class='line'>                <span class="n">newUri</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">&quot;mfm:///&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">newUri</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">name</span><span class="o">.</span><span class="na">replace</span><span class="o">(</span><span class="sc">&#39;.&#39;</span><span class="o">,</span> <span class="sc">&#39;/&#39;</span><span class="o">));</span>
+</span><span class='line'>                <span class="k">if</span><span class="o">(</span><span class="n">name</span><span class="o">.</span><span class="na">endsWith</span><span class="o">(</span><span class="n">EXT</span><span class="o">))</span> <span class="n">newUri</span><span class="o">.</span><span class="na">replace</span><span class="o">(</span><span class="n">newUri</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="n">EXT</span><span class="o">.</span><span class="na">length</span><span class="o">(),</span> <span class="n">newUri</span><span class="o">.</span><span class="na">length</span><span class="o">(),</span> <span class="n">EXT</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">URI</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">newUri</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">exp</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">URI</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s">&quot;mfm:///com/sun/script/java/java_source&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">me</span><span class="o">.</span><span class="na">soulmachine</span><span class="o">.</span><span class="na">compiler</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.net.MalformedURLException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.net.URL</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.net.URLClassLoader</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.StringTokenizer</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * ClassLoader that loads .class bytes from memory.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">final</span> <span class="kd">class</span> <span class="nc">MemoryClassLoader</span> <span class="kd">extends</span> <span class="n">URLClassLoader</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">classBytes</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">MemoryClassLoader</span><span class="o">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">classBytes</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">String</span> <span class="n">classPath</span><span class="o">,</span> <span class="n">ClassLoader</span> <span class="n">parent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">toURLs</span><span class="o">(</span><span class="n">classPath</span><span class="o">),</span> <span class="n">parent</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">classBytes</span> <span class="o">=</span> <span class="n">classBytes</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">MemoryClassLoader</span><span class="o">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">classBytes</span><span class="o">,</span> <span class="n">String</span> <span class="n">classPath</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">(</span><span class="n">classBytes</span><span class="o">,</span> <span class="n">classPath</span><span class="o">,</span> <span class="n">ClassLoader</span><span class="o">.</span><span class="na">getSystemClassLoader</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">MemoryClassLoader</span><span class="o">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">classBytes</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">(</span><span class="n">classBytes</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">ClassLoader</span><span class="o">.</span><span class="na">getSystemClassLoader</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Class</span> <span class="nf">load</span><span class="o">(</span><span class="n">String</span> <span class="n">className</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">ClassNotFoundException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nf">loadClass</span><span class="o">(</span><span class="n">className</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Iterable</span><span class="o">&lt;</span><span class="n">Class</span><span class="o">&gt;</span> <span class="nf">loadAll</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">ClassNotFoundException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Class</span><span class="o">&gt;</span> <span class="n">classes</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Class</span><span class="o">&gt;(</span><span class="n">classBytes</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+</span><span class='line'>        <span class="k">for</span> <span class="o">(</span><span class="n">String</span> <span class="n">name</span> <span class="o">:</span> <span class="n">classBytes</span><span class="o">.</span><span class="na">keySet</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">classes</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">loadClass</span><span class="o">(</span><span class="n">name</span><span class="o">));</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">classes</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">protected</span> <span class="n">Class</span> <span class="nf">findClass</span><span class="o">(</span><span class="n">String</span> <span class="n">className</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">ClassNotFoundException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kt">byte</span><span class="o">[]</span> <span class="n">buf</span> <span class="o">=</span> <span class="n">classBytes</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">className</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">buf</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// clear the bytes in map -- we don&#39;t need it anymore</span>
+</span><span class='line'>            <span class="n">classBytes</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">className</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">return</span> <span class="nf">defineClass</span><span class="o">(</span><span class="n">className</span><span class="o">,</span> <span class="n">buf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">buf</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">findClass</span><span class="o">(</span><span class="n">className</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="n">URL</span><span class="o">[]</span> <span class="nf">toURLs</span><span class="o">(</span><span class="n">String</span> <span class="n">classPath</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">classPath</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="k">new</span> <span class="n">URL</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">URL</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">URL</span><span class="o">&gt;();</span>
+</span><span class='line'>        <span class="n">StringTokenizer</span> <span class="n">st</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringTokenizer</span><span class="o">(</span><span class="n">classPath</span><span class="o">,</span> <span class="n">File</span><span class="o">.</span><span class="na">pathSeparator</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">while</span> <span class="o">(</span><span class="n">st</span><span class="o">.</span><span class="na">hasMoreTokens</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">String</span> <span class="n">token</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="na">nextToken</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">token</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">file</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">file</span><span class="o">.</span><span class="na">toURI</span><span class="o">().</span><span class="na">toURL</span><span class="o">());</span>
+</span><span class='line'>                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">MalformedURLException</span> <span class="n">mue</span><span class="o">)</span> <span class="o">{}</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="n">URL</span><span class="o">(</span><span class="n">token</span><span class="o">));</span>
+</span><span class='line'>                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">MalformedURLException</span> <span class="n">mue</span><span class="o">)</span> <span class="o">{}</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">URL</span><span class="o">[]</span> <span class="n">res</span> <span class="o">=</span> <span class="k">new</span> <span class="n">URL</span><span class="o">[</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()];</span>
+</span><span class='line'>        <span class="n">list</span><span class="o">.</span><span class="na">toArray</span><span class="o">(</span><span class="n">res</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">res</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Explanations</strong>:</p>
+
+<ol>
+<li>In order to represent a  Java source file in memory instead of disk, I defined a <code>StringInputBuffer</code> class in the <code>MemoryJavaFileManager.java</code>.</li>
+<li>To save the compiled <code>.class</code> files in memory, I implemented a class <code>MemoryJavaFileManager</code>.  The main idea is to override the function <code>getJavaFileForOutput()</code> to store bytecodes into a map.</li>
+<li>To load the bytecodes in memory, I have to implement a customized classloader <code>MemoryClassLoader</code>, which reads bytecodes in the map and turn them into classes.</li>
+</ol>
+
+
+<p>Here is a unite test.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">me</span><span class="o">.</span><span class="na">soulmachine</span><span class="o">.</span><span class="na">compiler</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.lang.reflect.InvocationTargetException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.lang.reflect.Method</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">junit</span><span class="o">.</span><span class="na">Assert</span><span class="o">.</span><span class="na">assertEquals</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MemoryJavaCompilerTest</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">MemoryJavaCompiler</span> <span class="n">compiler</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MemoryJavaCompiler</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Test</span> <span class="kd">public</span> <span class="kt">void</span> <span class="n">compileStaticMethodTest</span><span class="o">()</span>
+</span><span class='line'>        <span class="kd">throws</span> <span class="n">ClassNotFoundException</span><span class="o">,</span> <span class="n">InvocationTargetException</span><span class="o">,</span> <span class="n">IllegalAccessException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">String</span> <span class="n">source</span> <span class="o">=</span> <span class="s">&quot;public final class Solution {\n&quot;</span>
+</span><span class='line'>            <span class="o">+</span> <span class="s">&quot;public static String greeting(String name) {\n&quot;</span>
+</span><span class='line'>            <span class="o">+</span> <span class="s">&quot;\treturn \&quot;Hello \&quot; + name;\n&quot;</span> <span class="o">+</span> <span class="s">&quot;}\n}\n&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Method</span> <span class="n">greeting</span> <span class="o">=</span> <span class="n">compiler</span><span class="o">.</span><span class="na">compileStaticMethod</span><span class="o">(</span><span class="s">&quot;greeting&quot;</span><span class="o">,</span> <span class="s">&quot;Solution&quot;</span><span class="o">,</span> <span class="n">source</span><span class="o">);</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">greeting</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="s">&quot;soulmachine&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">assertEquals</span><span class="o">(</span><span class="s">&quot;Hello soulmachine&quot;</span><span class="o">,</span> <span class="n">result</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Reference</h2>
+
+<ol>
+<li><a href="https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/scriptengine/java">JavaCompiler.java from Cloudera Morphlines</a></li>
+<li><a href="http://stackoverflow.com/questions/1168931/how-to-create-an-object-from-a-string-in-java-how-to-eval-a-string">How to create an object from a string in Java (how to eval a string)?</a></li>
+<li><a href="https://github.com/trung/InMemoryJavaCompiler">InMemoryJavaCompiler</a></li>
+<li><a href="https://github.com/OpenHFT/Java-Runtime-Compiler">Java-Runtime-Compiler</a></li>
+<li><a href="http://pfmiles.github.io/blog/dynamic-java/">动态的Java &ndash; 无废话JavaCompilerAPI中文指南</a></li>
+</ol>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-22T15:42:18-07:00" pubdate data-updated="true">Jul 22<span>nd</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/compiler/'>Compiler</a>, <a class='category' href='/blog/categories/java/'>Java</a>
+  
+</span>
+
+
+    </p>
+    
+      <!-- AddThis Smart Layers BEGIN -->
+<!-- Go to http://www.addthis.com/get/smart-layers to customize -->
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517919846a2b41be"></script>
+<script type="text/javascript">
+  addthis.layers({
+    'theme' : 'transparent',
+    'share' : {
+      'position' : 'left',
+      'numPreferredServices' : 5
+    }, 
+    'follow' : {
+      'services' : [
+        {'service': 'facebook', 'id': 'soulmachine'},
+        {'service': 'twitter', 'id': 'soulmachine'},
+        {'service': 'linkedin', 'id': 'soulmachine'},
+        {'service': 'google_follow', 'id': '103519507226474510310'}
+      ]
+    },  
+    'whatsnext' : {},  
+    'recommended' : {} 
+  });
+</script>
+<!-- AddThis Smart Layers END -->
+<div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://www.soulmachine.me/blog/2015/07/22/compile-and-run-java-source-code-in-memory/" data-via="soulmachine" data-counturl="http://www.soulmachine.me/blog/2015/07/22/compile-and-run-java-source-code-in-memory/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/" title="Previous Post: Deserialize a JSON String to a Binary Tree">&laquo; Deserialize a JSON String to a Binary Tree</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/07/23/calling-c-code-from-java-using-jni/" title="Next Post: Calling C code from Java using JNI">Calling C code from Java using JNI &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <p>Spark, Machine Learning, Scala, <a href="/about">more...</a></p>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/compiler/'>Compiler (1)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (2)</a></li><li><a href='/blog/categories/jackson/'>Jackson (2)</a></li><li><a href='/blog/categories/java/'>Java (5)</a></li><li><a href='/blog/categories/json/'>JSON (2)</a></li><li><a href='/blog/categories/tools/'>Tools (1)</a></li></ul>
+</section>
+<section>
+  <h2>Blogroll</h2>
+  <ul>
+    <li>
+      <a href="http://yewen.us/" title="ACMer">Ye Wen</a>
+    </li>
+	<li>
+      <a href="http://blog.liancheng.info/" title="Engineer at Databricks">Lian Cheng</a>
+    </li>
+    <li>
+      <a href="http://www.rational.so/" title="CS PhD Candidate at Tsinghua University">Dong Yan</a>
+    </li>
+	<li>
+      <a href="http://www.parallellabs.com/" title="Data Scientist / Technical Leader at IBM">Parallel Labs</a>
+    </li>
+	<li>
+      <a href="http://blog.javachen.com/" title="">JavaChen</a>
+    </li>
+	<li>
+      <a href="http://shenfeng.me/" title="http-kit, clojure">Shen Feng</a>
+    </li>
+	<li>
+      <a href="http://www.lihaipeng.info/" title="Senior engineer at Baidu">Lee Haipeng</a>
+    </li>
+	<li>
+      <a href="http://www.chioka.in/" title="Engineer at Google">Eric</a>
+    </li>
+    <li>
+      <a href="http://blog.csdn.net/lgnlgn" title="Engineer at Maopu">Liang Sir</a>
+    </li>
+    <li>
+      <a href="http://www.doesbetter.com/" title="Machine learning Master">Wang Xiaoshu</a>
+    </li>
+    <li>
+      <a href="http://www.foreverlee.net/" title="CS PhD Candidate at IACAS">ForeverLee</a>
+    </li>
+  </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/23/calling-c-code-from-java-using-jni/">Calling C Code From Java Using JNI</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/22/compile-and-run-java-source-code-in-memory/">Compile and Run Java Source Code in Memory</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/">Deserialize a JSON String to a Binary Tree</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/21/deserialize-a-json-array-to-a-singly-linked-list/">Deserialize a JSON Array to a Singly Linked List</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/30/debug-hadoop-applications-with-intellij/">Debug Hadoop Applications With IntelliJ</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h2>Recent Comments</h2>
+  <div id="dsq-recentcomments" class="dsq-widget"><script type="text/javascript" src="http://disqus.com/forums/soulmachine/recent_comments_widget.js?hide_avatars=0&num_items=5&excerpt_length=20"></script></div>
+</section>
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<p>
+  Copyright &copy; 2015 - soulmachine -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'soulmachine';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://www.soulmachine.me/blog/2015/07/22/compile-and-run-java-source-code-in-memory/';
+        var disqus_url = 'http://www.soulmachine.me/blog/2015/07/22/compile-and-run-java-source-code-in-memory/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
