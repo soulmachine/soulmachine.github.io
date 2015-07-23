@@ -9,7 +9,7 @@
   <meta name="author" content="soulmachine">
 
   
-  <meta name="description" content="A simple solution We know that Jackson is very convenient to deserialize a JSON string into a ArrayList, HashMap or POJO object. But how to &hellip;">
+  <meta name="description" content="This blog is a copy of http://stuf.ro/calling-c-code-from-java-using-jni with some errors fixed. In this tutorial we&rsquo;ll be creating a Java &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +79,93 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/23/calling-c-code-from-java-using-jni/">Calling C Code From Java Using JNI</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-23T02:28:28-07:00" pubdate data-updated="true">Jul 23<span>rd</span>, 2015</time>
+        
+           | <a href="/blog/2015/07/23/calling-c-code-from-java-using-jni/#disqus_thread"
+             data-disqus-identifier="http://www.soulmachine.me/blog/2015/07/23/calling-c-code-from-java-using-jni/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This blog is a copy of <a href="http://stuf.ro/calling-c-code-from-java-using-jni">http://stuf.ro/calling-c-code-from-java-using-jni</a> with some errors fixed.</p>
+
+<p>In this tutorial we&rsquo;ll be creating a Java application calling code from a native library. We&rsquo;ll have a Java application called HelloWorld which will call the function helloFromC from a shared library named ctest, using Java Native Interface.</p>
+
+<p>First off, we&rsquo;ll create a file named HelloWorld.java to contain the HelloWorld class.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/* HelloWorld.java */</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">native</span> <span class="kt">void</span> <span class="nf">helloFromC</span><span class="o">();</span> <span class="cm">/* (1) */</span>
+</span><span class='line'>    <span class="kd">static</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">loadLibrary</span><span class="o">(</span><span class="s">&quot;ctest&quot;</span><span class="o">);</span> <span class="cm">/* (2) */</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">public</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">argv</span><span class="o">[])</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">HelloWorld</span> <span class="n">helloWorld</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HelloWorld</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">helloWorld</span><span class="o">.</span><span class="na">helloFromC</span><span class="o">();</span> <span class="cm">/* (3) */</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Make the virtual machine aware of a function defined externally, named &ldquo;helloFromC&rdquo;</li>
+<li>Load an external library called &ldquo;ctest&rdquo; (which will need to define this function)</li>
+<li>Call the function we talked about</li>
+</ol>
+
+
+<p>Even though we didn&rsquo;t write any library yet, we can still compile the Java application, because this is a dependency that will be resolved at runtime. So, let&rsquo;s compile the application:</p>
+
+<pre><code>javac HelloWorld.java
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/07/23/calling-c-code-from-java-using-jni/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -608,7 +695,7 @@ export PATH=$FB_HOME/bin:$PATH
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/hadoop/'>Hadoop (2)</a></li><li><a href='/blog/categories/jackson/'>Jackson (2)</a></li><li><a href='/blog/categories/java/'>Java (3)</a></li><li><a href='/blog/categories/json/'>JSON (2)</a></li><li><a href='/blog/categories/tools/'>Tools (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/hadoop/'>Hadoop (2)</a></li><li><a href='/blog/categories/jackson/'>Jackson (2)</a></li><li><a href='/blog/categories/java/'>Java (4)</a></li><li><a href='/blog/categories/json/'>JSON (2)</a></li><li><a href='/blog/categories/tools/'>Tools (1)</a></li></ul>
 </section>
 <section>
   <h2>Blogroll</h2>
@@ -653,6 +740,10 @@ export PATH=$FB_HOME/bin:$PATH
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/23/calling-c-code-from-java-using-jni/">Calling C Code From Java Using JNI</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/06/22/deserialize-a-json-string-to-a-binary-tree/">Deserialize a JSON String to a Binary Tree</a>
       </li>
     
@@ -666,10 +757,6 @@ export PATH=$FB_HOME/bin:$PATH
     
       <li class="post">
         <a href="/blog/2015/01/29/create-a-hadoop-compilation-and-development-environment/">Create a Hadoop Compilation and Development Environment</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/15/java-code-style-and-static-analysis/">Java Code Style and Static Analysis</a>
       </li>
     
   </ul>

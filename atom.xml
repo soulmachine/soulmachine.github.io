@@ -4,7 +4,7 @@
   <title><![CDATA[soulmachine]]></title>
   <link href="http://www.soulmachine.me/atom.xml" rel="self"/>
   <link href="http://www.soulmachine.me/"/>
-  <updated>2015-06-22T02:32:42-07:00</updated>
+  <updated>2015-07-23T02:32:19-07:00</updated>
   <id>http://www.soulmachine.me/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,193 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Calling C Code From Java Using JNI]]></title>
+    <link href="http://www.soulmachine.me/blog/2015/07/23/calling-c-code-from-java-using-jni/"/>
+    <updated>2015-07-23T02:28:28-07:00</updated>
+    <id>http://www.soulmachine.me/blog/2015/07/23/calling-c-code-from-java-using-jni</id>
+    <content type="html"><![CDATA[<p>This blog is a copy of <a href="http://stuf.ro/calling-c-code-from-java-using-jni">http://stuf.ro/calling-c-code-from-java-using-jni</a> with some errors fixed.</p>
+
+<p>In this tutorial we&rsquo;ll be creating a Java application calling code from a native library. We&rsquo;ll have a Java application called HelloWorld which will call the function helloFromC from a shared library named ctest, using Java Native Interface.</p>
+
+<p>First off, we&rsquo;ll create a file named HelloWorld.java to contain the HelloWorld class.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/* HelloWorld.java */</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">native</span> <span class="kt">void</span> <span class="nf">helloFromC</span><span class="o">();</span> <span class="cm">/* (1) */</span>
+</span><span class='line'>    <span class="kd">static</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">loadLibrary</span><span class="o">(</span><span class="s">&quot;ctest&quot;</span><span class="o">);</span> <span class="cm">/* (2) */</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">public</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">argv</span><span class="o">[])</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">HelloWorld</span> <span class="n">helloWorld</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HelloWorld</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">helloWorld</span><span class="o">.</span><span class="na">helloFromC</span><span class="o">();</span> <span class="cm">/* (3) */</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Make the virtual machine aware of a function defined externally, named &ldquo;helloFromC&rdquo;</li>
+<li>Load an external library called &ldquo;ctest&rdquo; (which will need to define this function)</li>
+<li>Call the function we talked about</li>
+</ol>
+
+
+<p>Even though we didn&rsquo;t write any library yet, we can still compile the Java application, because this is a dependency that will be resolved at runtime. So, let&rsquo;s compile the application:</p>
+
+<pre><code>javac HelloWorld.java
+</code></pre>
+
+<!-- more -->
+
+
+<p>This will generate a HelloWorld.class file containing the application. Running the application will now result in an error, as we expect, because the library is not created yet:</p>
+
+<pre><code>java -cp . HelloWorld
+
+Exception in thread "main" java.lang.UnsatisfiedLinkError: no ctest in java.library.path
+    at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1754)
+    at java.lang.Runtime.loadLibrary0(Runtime.java:823)
+    at java.lang.System.loadLibrary(System.java:1045)
+    at HelloWorld.(HelloWorld.java:6)
+</code></pre>
+
+<p>Alright, let&rsquo;s now start writing the ctest library in C. To do that, we must first generate a header file from the .class file we created earlier. This header file will contain the definition of the function as it must be present in the C file.</p>
+
+<pre><code>javah -cp . HelloWorld
+</code></pre>
+
+<p>This command will generate a <code>HelloWorld.h</code> file in the same directory, containing the following code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cm">/* DO NOT EDIT THIS FILE - it is machine generated */</span>
+</span><span class='line'><span class="cp">#include &lt;jni.h&gt;</span>
+</span><span class='line'><span class="cm">/* Header for class HelloWorld */</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#ifndef _Included_HelloWorld</span>
+</span><span class='line'><span class="cp">#define _Included_HelloWorld</span>
+</span><span class='line'><span class="cp">#ifdef __cplusplus</span>
+</span><span class='line'><span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="p">{</span>
+</span><span class='line'><span class="cp">#endif</span>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm"> * Class:     HelloWorld</span>
+</span><span class='line'><span class="cm"> * Method:    helloFromC</span>
+</span><span class='line'><span class="cm"> * Signature: ()V</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="n">JNIEXPORT</span> <span class="kt">void</span> <span class="n">JNICALL</span> <span class="n">Java_HelloWorld_helloFromC</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">JNIEnv</span> <span class="o">*</span><span class="p">,</span> <span class="n">jobject</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#ifdef __cplusplus</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">#endif</span>
+</span><span class='line'><span class="cp">#endif</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We&rsquo;ll leave this file exactly as is, as the comment suggests, but we need to copy the function definition. Copy the definition and put it in a new file, named ctest.c:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cm">/* ctest.c */</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">JNIEXPORT</span> <span class="kt">void</span> <span class="n">JNICALL</span> <span class="nf">Java_HelloWorld_helloFromC</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">JNIEnv</span> <span class="o">*</span> <span class="n">env</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">jobj</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that we gave names to the parameters. Now let&rsquo;s implement the function. Aside from our own includes, we also need to include jni.h for this to work. So, modify the ctest.c file to contain something like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cm">/* ctest.c */</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#include &lt;jni.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">JNIEXPORT</span> <span class="kt">void</span> <span class="n">JNICALL</span> <span class="nf">Java_HelloWorld_helloFromC</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">JNIEnv</span> <span class="o">*</span> <span class="n">env</span><span class="p">,</span> <span class="n">jobject</span> <span class="n">jobj</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Hello from C!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now that we have the file, let&rsquo;s compile it and create a native library. This part is system dependent, but the only things that change really are the extension of the generated library file and the path to the jni.h include.</p>
+
+<pre><code>gcc -o libctest.so -shared -fpic -I$JAVA_HOME/include -I$JAVA_HOME/include/linux  ctest.c
+</code></pre>
+
+<p>Replace .so with .dylib if you&rsquo;re on a Mac, or .dll if you&rsquo;re on Windows (remove the lib part from the file name as well if you&rsquo;re on Windows). Also, replace /path/to/jdk/headers with the full path to the directory containing the file jni.h. If you don&rsquo;t know where that is, you can use the locate jni.h command on UNIX-like systems.</p>
+
+<p>Once you successfully run the above command, you will see a libctest.so file in the current directory (or libctest.dylib or libctest.dll). If you remember from the Java code you wrote earlier, the virtual machine will expect a library named ctest to reside in the current directory (point 2). By that, it means that a file with the name libctest.so should be here, which you just created.</p>
+
+<p>To see this in action, run the application:</p>
+
+<pre><code>java -cp . -Djava.library.path=. HelloWorld
+</code></pre>
+
+<p>If everything works correctly, you should see:</p>
+
+<pre><code>Hello from C!
+</code></pre>
+
+<h2>Reference</h2>
+
+<ol>
+<li><a href="http://stuf.ro/calling-c-code-from-java-using-jni">Calling C code from Java using JNI</a></li>
+<li><a href="http://stackoverflow.com/questions/15090620/java-lang-unsatisfiedlinkerror-with-jni-and-c">java.lang.UnsatisfiedLinkError with JNI and c</a></li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Deserialize a JSON String to a Binary Tree]]></title>
